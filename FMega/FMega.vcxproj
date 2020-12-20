@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{0b6403d3-bb9a-4067-a96c-3bf19f0a01cc}</ProjectGuid>
+    <RootNamespace>Tempo</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>FMega</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IntDir>$(SolutionDir)interm\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IntDir>$(SolutionDir)interm\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <VcpkgEnabled>false</VcpkgEnabled>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <VcpkgEnabled>false</VcpkgEnabled>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>FMEGA_DEBUG;FMEGA_WIN32;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>src;../include;../include/bullet;../include/zlib;../include/assimp</AdditionalIncludeDirectories>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>fmega.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>glew32s.lib;opengl32.lib;glfw3.lib;pugixml.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\Engine\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>FMEGA_WIN32;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>src;../include;../include/bullet;../include/zlib;../include/assimp</AdditionalIncludeDirectories>
+      <Optimization>Full</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>fmega.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>glew32s.lib;opengl32.lib;glfw3.lib;pugixml.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\Engine\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="src\core\entity\entity.h" />
+    <ClInclude Include="src\core\entity\graphicsEntity.h" />
+    <ClInclude Include="src\core\event\event.h" />
+    <ClInclude Include="src\core\event\eventListener.h" />
+    <ClInclude Include="src\core\event\eventManager.h" />
+    <ClInclude Include="src\core\event\eventType.h" />
+    <ClInclude Include="src\core\game.h" />
+    <ClInclude Include="src\core\global.h" />
+    <ClInclude Include="src\core\input.h" />
+    <ClInclude Include="src\core\scene.h" />
+    <ClInclude Include="src\fmega\cameras\fpCamera.h" />
+    <ClInclude Include="src\fmega\cameras\gameCamera.h" />
+    <ClInclude Include="src\fmega\entities\levelManager.h" />
+    <ClInclude Include="src\fmega\entities\platform.h" />
+    <ClInclude Include="src\fmega\entities\player.h" />
+    <ClInclude Include="src\fmega\cameras\tpCamera.h" />
+    <ClInclude Include="src\fmega\gameOverEvent.h" />
+    <ClInclude Include="src\fmega\platformManager.h" />
+    <ClInclude Include="src\fmega\restartManager.h" />
+    <ClInclude Include="src\fmega\skybox.h" />
+    <ClInclude Include="src\graphics\camera.h" />
+    <ClInclude Include="src\graphics\display.h" />
+    <ClInclude Include="src\graphics\displayShared.h" />
+    <ClInclude Include="src\graphics\gpuBuffer.h" />
+    <ClInclude Include="src\graphics\gpuBufferShared.h" />
+    <ClInclude Include="src\graphics\material.h" />
+    <ClInclude Include="src\graphics\mesh.h" />
+    <ClInclude Include="src\graphics\meshFactory.h" />
+    <ClInclude Include="src\graphics\meshShared.h" />
+    <ClInclude Include="src\graphics\renderingContext.h" />
+    <ClInclude Include="src\graphics\renderingContextShared.h" />
+    <ClInclude Include="src\graphics\shader.h" />
+    <ClInclude Include="src\graphics\shaderShared.h" />
+    <ClInclude Include="src\graphics\texture2d.h" />
+    <ClInclude Include="src\graphics\texture2dShared.h" />
+    <ClInclude Include="src\graphics\transform.h" />
+    <ClInclude Include="src\io\files.h" />
+    <ClInclude Include="src\io\image.h" />
+    <ClInclude Include="src\io\resources.h" />
+    <ClInclude Include="src\macros.h" />
+    <ClInclude Include="src\fmega.h" />
+    <ClInclude Include="src\fmega\entities\fmegaEntity.h" />
+    <ClInclude Include="src\fmega\entities\collision.h" />
+    <ClInclude Include="src\fmega\fmegaObjectFactory.h" />
+    <ClInclude Include="src\fmega\fmegaRenderer.h" />
+    <ClInclude Include="src\fmega\fmegaScene.h" />
+    <ClInclude Include="src\thirdparty\glfw\glfwDisplay.h" />
+    <ClInclude Include="src\thirdparty\glfw\glfwInput.h" />
+    <ClInclude Include="src\thirdparty\glfw\glfwTimer.h" />
+    <ClInclude Include="src\thirdparty\glfw\opengl.h" />
+    <ClInclude Include="src\thirdparty\opengl\glBuffer.h" />
+    <ClInclude Include="src\thirdparty\opengl\glMesh.h" />
+    <ClInclude Include="src\thirdparty\opengl\glRenderingContext.h" />
+    <ClInclude Include="src\thirdparty\opengl\glShader.h" />
+    <ClInclude Include="src\thirdparty\opengl\glTexture2d.h" />
+    <ClInclude Include="src\thirdparty\opengl\opengl.h" />
+    <ClInclude Include="src\thirdparty\stl\stlFiles.h" />
+    <ClInclude Include="src\utils\colors.h" />
+    <ClInclude Include="src\utils\log.h" />
+    <ClInclude Include="src\utils\random.h" />
+    <ClInclude Include="src\utils\scopedTimer.h" />
+    <ClInclude Include="src\utils\string.h" />
+    <ClInclude Include="src\utils\stringUtils.h" />
+    <ClInclude Include="src\utils\timer.h" />
+    <ClInclude Include="src\utils\type.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\core\entity\entity.cpp" />
+    <ClCompile Include="src\core\entity\graphicsEntity.cpp" />
+    <ClCompile Include="src\core\event\eventManager.cpp" />
+    <ClCompile Include="src\core\event\eventType.cpp" />
+    <ClCompile Include="src\core\game.cpp" />
+    <ClCompile Include="src\core\global.cpp" />
+    <ClCompile Include="src\core\input.cpp" />
+    <ClCompile Include="src\core\scene.cpp" />
+    <ClCompile Include="src\fmega\cameras\fpCamera.cpp" />
+    <ClCompile Include="src\fmega\cameras\gameCamera.cpp" />
+    <ClCompile Include="src\fmega\entities\levelManager.cpp" />
+    <ClCompile Include="src\fmega\entities\platform.cpp" />
+    <ClCompile Include="src\fmega\entities\player.cpp" />
+    <ClCompile Include="src\fmega\cameras\tpCamera.cpp" />
+    <ClCompile Include="src\fmega\platformManager.cpp" />
+    <ClCompile Include="src\fmega\restartManager.cpp" />
+    <ClCompile Include="src\fmega\skybox.cpp" />
+    <ClCompile Include="src\graphics\meshFactory.cpp" />
+    <ClCompile Include="src\io\files.cpp" />
+    <ClCompile Include="src\io\image.cpp" />
+    <ClCompile Include="src\io\resources.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\fmega.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\fmega\entities\fmegaEntity.cpp" />
+    <ClCompile Include="src\fmega\entities\collision.cpp" />
+    <ClCompile Include="src\fmega\fmegaObjectFactory.cpp" />
+    <ClCompile Include="src\fmega\fmegaScene.cpp" />
+    <ClCompile Include="src\fmega\fmegaRenderer.cpp" />
+    <ClCompile Include="src\thirdparty\dummy\dummyLog.cpp" />
+    <ClCompile Include="src\thirdparty\glfw\glfwDisplay.cpp" />
+    <ClCompile Include="src\thirdparty\opengl\glBuffer.cpp" />
+    <ClCompile Include="src\thirdparty\opengl\glMesh.cpp" />
+    <ClCompile Include="src\thirdparty\opengl\glRenderingContext.cpp" />
+    <ClCompile Include="src\thirdparty\opengl\glShader.cpp" />
+    <ClCompile Include="src\thirdparty\opengl\glTexture2d.cpp" />
+    <ClCompile Include="src\thirdparty\stb\stbImage.cpp" />
+    <ClCompile Include="src\thirdparty\stl\stlFiles.cpp" />
+    <ClCompile Include="src\thirdparty\windows\windowsLog.cpp" />
+    <ClCompile Include="src\utils\colors.cpp" />
+    <ClCompile Include="src\utils\random.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\shaders\platform.frag" />
+    <None Include="assets\shaders\platform.vert" />
+    <None Include="assets\shaders\player.frag" />
+    <None Include="assets\shaders\player.vert" />
+    <None Include="assets\shaders\simple.frag" />
+    <None Include="assets\shaders\simple.vert" />
+    <None Include="assets\shaders\skybox.frag" />
+    <None Include="assets\shaders\skybox.vert" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
