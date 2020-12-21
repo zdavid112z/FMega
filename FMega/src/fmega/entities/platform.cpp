@@ -49,7 +49,7 @@ namespace fmega {
 		m_JobID = m_FMegaScene->GetPlatformManager()->SubmitPlatform(data);
 
 		m_LocalTransform.position = glm::vec3(x, 0, z);
-		m_Color = Colors::ToRGBA(TypeToColor(Type));
+		Color = Colors::ToRGBA(TypeToColor(Type));
 	}
 
 	Platform::~Platform()
@@ -66,9 +66,14 @@ namespace fmega {
 		}
 	}
 
+	byte* Platform::GetData(uint& size) {
+		size = sizeof(Data);
+		return Data;
+	}
+
 	void Platform::OnTouched() {
 		Type = PlatformType::ACTIVATED;
-		m_Color = Colors::ToRGBA(TypeToColor(Type));
+		Color = Colors::ToRGBA(TypeToColor(Type));
 	}
 
 	hsv Platform::TypeToColor(PlatformType type) {
@@ -94,7 +99,7 @@ namespace fmega {
 	{
 		m_LocalTransform.position.z += delta * m_FMegaScene->MoveSpeed;
 
-		if (m_LocalTransform.position.z - Length > 5.f) {
+		if (m_LocalTransform.position.z - Length > 150.f) {
 			Destroy();
 		}
 	}
@@ -108,7 +113,7 @@ namespace fmega {
 		}
 
 		if (m_Mesh != nullptr) {
-			m_FMegaScene->GetRenderer()->RenderPlatform(m_Mesh, m_GlobalTransform, m_Color);
+			m_FMegaScene->GetRenderer()->RenderPlatform(m_Mesh, m_GlobalTransform, Color);
 		}
 	}
 }

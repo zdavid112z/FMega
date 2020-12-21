@@ -12,18 +12,21 @@ namespace fmega {
 	{
 	public:
 		FMegaEntity(const std::string& name, Entity* parent, FMegaScene* scene);
-		virtual void Init(Mesh* mesh, CollisionObject* collision);
+		virtual void Init(CollisionObject* collision);
 		virtual ~FMegaEntity();
 
+		virtual void RewindUpdate(float delta);
 		virtual void Update(float delta) override;
 		virtual void Render(float delta) override;
-		
-		glm::vec4 Color = glm::vec4(0);
+
+		virtual byte* GetData(uint& size);
+		virtual uint GetSaveSize();
+		virtual void Save(byte* data, uint& size);
+		virtual void Load(byte* data, uint& size);
 
 		CollisionObject* GetCollision() { return m_Collision; }
 	protected:
 		CollisionObject* m_Collision = nullptr;
-		Mesh* m_Mesh = nullptr;
 		FMegaScene* m_FMegaScene;
 	};
 

@@ -13,9 +13,8 @@ namespace fmega {
 
 	}
 
-	void FMegaEntity::Init(Mesh* mesh, CollisionObject* collision)
+	void FMegaEntity::Init(CollisionObject* collision)
 	{
-		m_Mesh = mesh;
 		m_Collision = collision;
 	}
 
@@ -24,6 +23,33 @@ namespace fmega {
 		if (m_Collision) {
 			delete m_Collision;
 		}
+	}
+
+	byte* FMegaEntity::GetData(uint& size) {
+		size = 0;
+		return nullptr;
+	}
+
+	uint FMegaEntity::GetSaveSize() {
+		uint result;
+		GetData(result);
+		return result + sizeof(m_LocalTransform);
+	}
+
+	void FMegaEntity::Save(byte* data, uint& size) {
+		byte* src = GetData(size);
+		if (src != nullptr)
+			memcpy(data, src, size);
+		memcpy(data + size, &m_LocalTransform, sizeof(m_LocalTransform));
+		size += sizeof(m_LocalTransform);
+	}
+
+	void FMegaEntity::Load(byte* data, uint& size) {
+		byte* dest = GetData(size);
+		if (dest != nullptr)
+			memcpy(dest, data, size);
+		memcpy(&m_LocalTransform, data + size, sizeof(m_LocalTransform));
+		size += sizeof(m_LocalTransform);
 	}
 
 	void FMegaEntity::Update(float delta)
@@ -37,14 +63,18 @@ namespace fmega {
 		}
 	}
 
+	void FMegaEntity::RewindUpdate(float delta) {
+
+	}
+
 	void FMegaEntity::Render(float delta)
 	{
-		if (m_Mesh) {
+		/*if (m_Mesh) {
 			MeshRenderData data;
 			data.model = m_GlobalTransform;
 			data.color = Color;
 			m_FMegaScene->GetRenderer()->RenderMesh(m_Mesh, data);
-		}
+		}*/
 	}
 
 }

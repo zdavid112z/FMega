@@ -28,9 +28,11 @@ namespace fmega {
 		SegmentMesh = FMegaObjectFactory::GenSegment(64);
 		SphereMesh = FMegaObjectFactory::GenSphere(1);
 		m_Renderer = new FMegaRenderer(this, m_PlayerRadius);
+		m_Rewind = new RewindManager(this, 180, 4.f);
 
 		EventListener l;
 		l.function = [this](Event e) {
+			// TODO: check if player has rewind
 			GameOverEventData* data = (GameOverEventData*)e.data;
 			m_SlowDeath = data->isSlow;
 			m_RestartManager->OnPlayerLost(data->isSlow);
@@ -48,23 +50,22 @@ namespace fmega {
 			delete m_PlatformManager;
 		}
 		m_PlatformManager = new PlatformManager();
-		if (m_Skybox != nullptr) {
-			delete m_Skybox;
-		}
-		m_Skybox = new Skybox(this);
+
 		for (auto e : m_Entities) {
 			delete e;
 		}
 		m_Entities.clear();
 
+		m_Skybox = new Skybox("Skybox", nullptr, this);
+		AddEntity(m_Skybox);
 		AddEntity(new LevelManager("Manager", nullptr, this));
 		AddEntity(new Player("Player", nullptr, this, m_PlayerRadius));
 	}
 
 	FMegaScene::~FMegaScene()
 	{
+		delete m_Rewind;
 		delete m_PlatformManager;
-		delete m_Skybox;
 		delete m_RestartManager;
 		delete SphereMesh;
 		delete BoxMesh;
@@ -91,8 +92,21 @@ namespace fmega {
 
 		UpdateGlobalTransforms();
 		float adjDelta = m_RestartManager->GetAdjDelta(delta);
-		m_Skybox->Update(adjDelta);
-		Scene::Update(adjDelta);
+		m_Rewind->Update();
+		if (!m_Rewind->IsRewinding()) {
+			Scene::Update(adjDelta);
+			if (GetGame()->GetDisplay()->GetInput()->WasKeyPressed(Key::R)) {
+				if (m_Rewind->CanRewind()) {
+					m_Rewind->StartRewind();
+				}
+			}
+		}
+		else {
+			ForeachEntity([this, delta](Entity* ee) {
+				FMegaEntity* e = (FMegaEntity*)ee;
+				e->RewindUpdate(delta);
+			});
+		}
 		m_RestartManager->Update(delta);
 	}
 
@@ -112,9 +126,9 @@ namespace fmega {
 		m_Renderer->SetShake(m_RestartManager->HasLost() && m_SlowDeath);
 
 		float adjDelta = m_RestartManager->GetAdjDelta(delta);
-		m_Renderer->Prepare(adjDelta);
+		m_Renderer->Prepare(adjDelta, m_Skybox->Offset);
 		if (!noClearColor) {
-			m_Skybox->Render(adjDelta);
+			m_Skybox->SkyboxRender(adjDelta);
 		}
 		Scene::Render(adjDelta);
 		m_RestartManager->Render(delta);

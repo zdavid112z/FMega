@@ -6,7 +6,7 @@
 namespace fmega {
 
 	FMegaRenderer::FMegaRenderer(FMegaScene* scene, float playerRadius) :
-		m_Scene(scene), m_PlayerRadius(playerRadius)
+		m_Scene(scene)
 	{
 		m_SimpleShader = new Shader("assets/shaders/simple.vert", "assets/shaders/simple.frag", sizeof(glm::mat4));
 		m_PlatformShader = new Shader("assets/shaders/platform.vert", "assets/shaders/platform.frag", sizeof(DynamicPlatformBuffer));
@@ -25,7 +25,7 @@ namespace fmega {
 		m_UIBuffer->SetSubdata((byte*)&uibuffer, sizeof(UIBuffer), 0);
 
 		m_Shake = false;
-		m_CameraOffset = 0;
+		m_ShakeTime = 0;
 	}
 
 	FMegaRenderer::~FMegaRenderer()
@@ -140,7 +140,7 @@ namespace fmega {
 		m_Shake = shake;
 	}
 
-	void FMegaRenderer::Prepare(float delta)
+	void FMegaRenderer::Prepare(float delta, float skyboxOffset)
 	{
 		SceneBuffer bufferData;
 		bufferData.targetZ = -15.f;
@@ -153,13 +153,12 @@ namespace fmega {
 			m_ShakeMatrix = glm::translate(glm::mat4(1), glm::vec3(cosf(angle2) * sinf(angle1), sinf(angle2), cosf(angle2) * cosf(angle2)) * amount);
 			view = m_ShakeMatrix * view;
 		}
-		m_CameraOffset += delta * m_Scene->MoveSpeed * 0.25f;
 		glm::mat4 projection = m_Scene->GetCamera()->projection;
 		bufferData.viewProjection = projection * view;
 		view[3] = glm::vec4(0, 0, 0, 1);
 		bufferData.invViewProjection = glm::inverse(projection * view);
 		bufferData.eyePosition = m_Scene->GetCamera()->position;
-		bufferData.cameraOffset = m_CameraOffset;
+		bufferData.cameraOffset = skyboxOffset;
 		m_DynamicSceneBuffer->SetSubdata((byte*)&bufferData, sizeof(bufferData), 0);
 	}
 

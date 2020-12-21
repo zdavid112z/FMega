@@ -12,6 +12,8 @@ namespace fmega {
 
 		virtual void Update(float delta) override;
 		virtual void Render(float delta) override;
+
+		virtual byte* GetData(uint& size) override;
 	private:
 		void SpawnPlatforms();
 		void GenerateNextConfiguration();
@@ -19,9 +21,16 @@ namespace fmega {
 			const std::vector<float>& chances,
 			const std::vector<PlatformType>& types);
 	private:
+		union {
+			struct {
+				float m_CurrentZ;
+			};
+			byte m_Data[4];
+		};
+
+		int m_PlatformId;
 		int m_NextConfiguration;
 		std::vector<PlatformType> m_NextPlatformTypes;
-		float m_CurrentZ = 0;
 		int m_CurrentPlatform;
 		int m_FuelBonusInterval;
 		float m_SpawnZ;

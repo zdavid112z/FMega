@@ -15,6 +15,9 @@ namespace fmega {
 
 		virtual void Update(float delta) override;
 		virtual void Render(float delta) override;
+		virtual void RewindUpdate(float delta) override;
+
+		virtual byte* GetData(uint& size) override;
 
 		glm::vec2 GetMinMaxSpeed();
 		bool IsSlowDying();
@@ -28,58 +31,71 @@ namespace fmega {
 		float CalcFuelMultiplier();
 		bool IsOnTopOf(Platform* p);
 		void HandleCollision(Platform* p, float delta);
+		void UpdateSceneSpeed();
 
 		Mesh* m_Box;
-		float m_FuelBoxHeight;
-		glm::vec4 m_FuelColor;
-		glm::vec4 m_FuelEmptyColor;
+		GameCamera* m_Cameras[2];
 
-		float m_MaxSpeedHeight;
-		float m_MaxSpeedFlicker;
-		glm::vec4 m_MaxSpeedColor;
+		union {
+			struct {
+				float m_Fuel;
+				int m_SpeedIndex;
+				float m_MaxSpeedTimer;
 
-		TPCamera* m_TPCamera;
-		FPCamera* m_FPCamera;
-		GameCamera* m_CurrentCamera;
+				float m_HeightK1;
+				float m_HeightK2;
+				float m_HeightK3;
+				glm::vec2 m_HeightClamp;
+				float m_Height;
+				float m_HeightVelocity;
+				float m_HeightImpulse;
 
-		float m_FuelBonusB;
-		float m_Fuel;
-		float m_MaxFuel;
-		std::vector<float> m_Speeds;
-		int m_SpeedIndex;
+				float m_AnimSpeed;
+				bool m_ForceOnTop;
 
-		float m_FuelGain;
-		float m_FuelLoss;
-		float m_MaxSpeedTime;
-		float m_MaxSpeedTimer;
-		float m_LostCollisionMultiplier;
+				float m_AnimTarget;
+				float m_AnimTime;
+				bool m_Lost;
+				bool m_Grounded;
 
-		float m_HeightK1;
-		float m_HeightK2;
-		float m_HeightK3;
-		glm::vec2 m_HeightClamp;
-		float m_AnimSpeed;
-		bool m_ForceOnTop = false;
-		float m_OnLandHeightImpulse = 4.f;
-		float m_AnimTarget = 0.f;
-		float m_AnimTime = 0.f;
-		bool m_Lost = false;
-		bool m_Grounded = false;
-		float m_FallGravity;
-		float m_LowJumpGravity;
-		float m_RiseGravity;
-		float m_CurrentGravity;
-		float m_VelocityY = 0;
-		float m_MoveSpeed;
-		float m_PlayerZ = -4.f;
-		float m_BottomY = 5.f;
-		float m_Radius;
-		float m_Height;
-		float m_HeightVelocity = 0;
-		float m_HeightImpulse = 0;
-		float m_JumpVelocity;
-		float m_JumpMaxHeight;
-		float m_RotationSpeed;
+				float m_CurrentGravity;
+				float m_VelocityY;
+				float m_BottomY;
+			};
+			byte m_Data[100];
+		};
+
+		int m_CameraIndex;
+
+		const std::vector<float> m_Speeds;
+
+		const float m_FuelBoxHeight;
+		const glm::vec4 m_FuelColor;
+		const glm::vec4 m_FuelEmptyColor;
+
+		const float m_MaxSpeedHeight;
+		const float m_MaxSpeedFlicker;
+		const glm::vec4 m_MaxSpeedColor;
+
+		const float m_FuelBonusB;
+		const float m_MaxFuel;
+
+		const float m_FuelGain;
+		const float m_FuelLoss;
+		const float m_MaxSpeedTime;
+		const float m_LostCollisionMultiplier;
+
+		const float m_OnLandHeightImpulse;
+		const float m_RiseGravity;
+		const float m_FallGravity;
+		const float m_LowJumpGravity;
+		const float m_JumpMaxHeight;
+		const float m_JumpVelocity;
+
+		const float m_MoveSpeed;
+		const float m_PlayerZ;
+		const float m_Radius;
+		const float m_RotationSpeed;
 	};
 
 }

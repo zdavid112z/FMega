@@ -126,7 +126,8 @@
     <ClInclude Include="src\fmega\gameOverEvent.h" />
     <ClInclude Include="src\fmega\platformManager.h" />
     <ClInclude Include="src\fmega\restartManager.h" />
-    <ClInclude Include="src\fmega\skybox.h" />
+    <ClInclude Include="src\fmega\entities\skybox.h" />
+    <ClInclude Include="src\fmega\rewindManager.h" />
     <ClInclude Include="src\graphics\camera.h" />
     <ClInclude Include="src\graphics\display.h" />
     <ClInclude Include="src\graphics\displayShared.h" />
@@ -190,7 +191,8 @@
     <ClCompile Include="src\fmega\cameras\tpCamera.cpp" />
     <ClCompile Include="src\fmega\platformManager.cpp" />
     <ClCompile Include="src\fmega\restartManager.cpp" />
-    <ClCompile Include="src\fmega\skybox.cpp" />
+    <ClCompile Include="src\fmega\entities\skybox.cpp" />
+    <ClCompile Include="src\fmega\rewindManager.cpp" />
     <ClCompile Include="src\graphics\meshFactory.cpp" />
     <ClCompile Include="src\io\files.cpp" />
     <ClCompile Include="src\io\image.cpp" />

@@ -45,7 +45,7 @@ namespace fmega {
 		FMegaRenderer(FMegaScene* scene, float playerRadius);
 		~FMegaRenderer();
 
-		void Prepare(float delta);
+		void Prepare(float delta, float skyboxOffset);
 		void RenderMesh(Mesh* mesh, MeshRenderData data, bool isUI = false);
 		void RenderDigit(Mesh* segment, MeshRenderData data, int digit);
 		void RenderAll();
@@ -58,9 +58,7 @@ namespace fmega {
 		void RenderMesh(QueueType::iterator&, bool bindShader);
 
 	public:
-		float m_CameraOffset;
 		float m_ShakeTime;
-		float m_PlayerRadius;
 		bool m_Shake;
 		glm::mat4 m_ShakeMatrix = glm::mat4(1.f);
 		FMegaScene* m_Scene;

@@ -10,62 +10,80 @@
 namespace fmega {
 
 	Player::Player(const std::string& name, Entity* parent, FMegaScene* scene, float radius) :
-		FMegaEntity(name, parent, scene), m_Radius(radius)
+		FMegaEntity(name, parent, scene),
+		m_Radius(radius),
+		m_MaxFuel(10.f),
+		m_Speeds( { 10.f, 15.f, 20.f, 25.f, 30.f } ),
+		m_FuelBonusB(2.5f),
+		m_FuelGain(5.f),
+		m_FuelLoss(3.5f),
+		m_MaxSpeedTime(5.f),
+		m_FuelColor(glm::vec4(237, 245, 22, 255) / 255.f),
+		m_FuelEmptyColor(glm::vec4(0, 0, 0, 1)),
+		m_FuelBoxHeight(0.4f),
+		m_RotationSpeed(30.f),
+		m_MoveSpeed(8.f),
+		m_JumpMaxHeight(4.75f),
+		m_RiseGravity(25.f),
+		m_FallGravity(2.f * m_RiseGravity),
+		m_LowJumpGravity(2.f * m_RiseGravity),
+		m_LostCollisionMultiplier(50.f),
+		m_MaxSpeedHeight(0.25f),
+		m_MaxSpeedFlicker(10.f),
+		m_MaxSpeedColor(glm::vec4(1, 0, 0, 1)),
+		m_JumpVelocity(sqrt(2 * m_RiseGravity * m_JumpMaxHeight)),
+		m_OnLandHeightImpulse(4.f),
+		m_PlayerZ(-4.f)
 	{
-		m_MaxFuel = 10.f;
+		m_CameraIndex = 0;
 		m_Fuel = m_MaxFuel;
-		m_Speeds = { 10.f, 15.f, 20.f, 25.f, 30.f };
 		m_SpeedIndex = 1;
-		m_FuelBonusB = 2.5f;
-
-		m_FuelGain = 5.f;
-		m_FuelLoss = 3.5f;
-		m_MaxSpeedTime = 5.f;
+		
 		m_MaxSpeedTimer = 0.f;
-
 		m_Box = m_FMegaScene->BoxMesh;
-		m_FuelColor = glm::vec4(237, 245, 22, 255) / 255.f;
-		m_FuelEmptyColor = glm::vec4(0, 0, 0, 1);
-		m_FuelBoxHeight = 0.4f;
 
-		m_RotationSpeed = 30.f;
 		m_BottomY = 2.f;
 		m_Height = 1.f;
-		m_MoveSpeed = 8.f;
+		m_CurrentGravity = m_FallGravity;
+		
 		m_LocalTransform.position = glm::vec3(0, 2.f, m_PlayerZ);
-		m_JumpMaxHeight = 4.75f;
-		m_RiseGravity = 25.f;
-		m_FallGravity = 2.f;
-		m_LowJumpGravity = 2.f;
-		m_LostCollisionMultiplier = 50.f;
 		m_HeightK1 = 20.f;
 		m_HeightK2 = 0.4f;
 		m_HeightK3 = 30.f;
 		m_HeightClamp = glm::vec2(0.7f, 1.1f);
 
-		m_MaxSpeedHeight = 0.25f;
-		m_MaxSpeedFlicker = 10.f;
-		m_MaxSpeedColor = glm::vec4(1, 0, 0, 1);
+		m_HeightVelocity = 0.f;
+		m_HeightImpulse = 0.f;
+		m_AnimTarget = 0.f;
+		m_AnimTime = 0.f;
+
+		m_Lost = false;
+		m_Grounded = false;
+		m_ForceOnTop = false;
+
+		m_VelocityY = 0.f;
+		m_BottomY = 5.f;
 
 		m_AnimSpeed = 3.f;
-		m_FallGravity *= m_RiseGravity;
-		m_LowJumpGravity *= m_RiseGravity;
-		m_JumpVelocity = sqrt(2 * m_RiseGravity * m_JumpMaxHeight);
 
 		constexpr float fov = glm::radians(90.f);
-		m_FPCamera = new FPCamera(m_FMegaScene, this, fov);
-		m_TPCamera = new TPCamera(m_FMegaScene, this, fov);
-
-		m_CurrentCamera = m_TPCamera;
-		m_CurrentCamera->OnRefocus();
-		m_FMegaScene->SetCamera(m_CurrentCamera->GetCamera());
+		m_Cameras[0] = new FPCamera(m_FMegaScene, this, fov);
+		m_Cameras[1] = new TPCamera(m_FMegaScene, this, fov);
+		m_CameraIndex = 1;
+		
+		m_Cameras[m_CameraIndex]->OnRefocus();
+		m_FMegaScene->SetCamera(m_Cameras[m_CameraIndex]->GetCamera());
 	}
 
 	Player::~Player()
 	{
-		delete m_FPCamera;
-		delete m_TPCamera;
-		delete m_Mesh;
+		delete m_Cameras[0];
+		delete m_Cameras[1];
+	}
+
+	byte* Player::GetData(uint& size) {
+		size = sizeof(m_Data);
+		return m_Data;
 	}
 
 	glm::vec2 Player::GetMinMaxSpeed() {
@@ -80,6 +98,11 @@ namespace fmega {
 	float Player::CalcFuelMultiplier() {
 		float x = m_Speeds[m_SpeedIndex] / m_Speeds.back();
 		return 1.f - glm::pow(m_FuelBonusB, -x);
+	}
+
+	void Player::RewindUpdate(float delta) {
+		UpdateSceneSpeed();
+		m_Cameras[m_CameraIndex]->Update(delta);
 	}
 
 	void Player::Update(float delta)
@@ -99,7 +122,7 @@ namespace fmega {
 		m_LocalTransform.rotation.x -= delta * m_RotationSpeed * m_FMegaScene->MoveSpeed / m_Speeds.back();
 		m_LocalTransform.position.y = m_BottomY + m_Radius * m_Height;
 
-		m_CurrentCamera->Update(delta);
+		m_Cameras[m_CameraIndex]->Update(delta);
 	}
 
 	void Player::CalcHeight(float delta) {
@@ -149,15 +172,20 @@ namespace fmega {
 
 	}
 
+	void Player::UpdateSceneSpeed() {
+		float speed = m_Speeds[m_SpeedIndex];
+		m_FMegaScene->MoveSpeed = speed;
+	}
+
 	void Player::HandleInput(float delta) {
 
 		auto input = m_FMegaScene->GetGame()->GetDisplay()->GetInput();
 
 		if (input->WasKeyPressed(Key::C)) {
-			m_CurrentCamera->OnFocusLost();
-			m_CurrentCamera = m_CurrentCamera == m_FPCamera ? (GameCamera*)m_TPCamera : (GameCamera*)m_FPCamera;
-			m_CurrentCamera->OnRefocus();
-			m_FMegaScene->SetCamera(m_CurrentCamera->GetCamera());
+			m_Cameras[m_CameraIndex]->OnFocusLost();
+			m_CameraIndex = 1 - m_CameraIndex;
+			m_Cameras[m_CameraIndex]->OnRefocus();
+			m_FMegaScene->SetCamera(m_Cameras[m_CameraIndex]->GetCamera());
 		}
 
 		if (m_MaxSpeedTimer > 0) {
@@ -176,8 +204,8 @@ namespace fmega {
 			m_SpeedIndex = glm::clamp(m_SpeedIndex, 0, int(m_Speeds.size()) - 2);
 		}
 
-		float speed = m_Speeds[m_SpeedIndex];
-		m_FMegaScene->MoveSpeed = speed;
+		UpdateSceneSpeed();
+
 		m_Fuel -= glm::max(0.f, delta * CalcFuelMultiplier());
 
 		if (!m_Lost && input->IsKeyDown(Key::SPACE) && m_Grounded) {
@@ -334,7 +362,7 @@ namespace fmega {
 			m_FMegaScene->GetRenderer()->RenderMesh(m_FMegaScene->BoxMesh, data, true);
 		}
 
-		if (m_CurrentCamera != m_FPCamera)
+		if (m_CameraIndex != 0) // FP Camera
 			m_FMegaScene->GetRenderer()->RenderPlayer(m_GlobalTransform, m_Height, m_AnimTime);
 	}
 }

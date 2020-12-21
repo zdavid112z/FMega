@@ -6,8 +6,9 @@
 #include "graphics/gpuBuffer.h"
 #include "entities/collision.h"
 #include "restartManager.h"
-#include "skybox.h"
+#include "entities/skybox.h"
 #include "platformManager.h"
+#include "rewindManager.h"
 
 namespace fmega {
 
@@ -25,6 +26,7 @@ namespace fmega {
 
 		FMegaRenderer* GetRenderer() { return m_Renderer; }
 		PlatformManager* GetPlatformManager() { return m_PlatformManager; }
+		RewindManager* GetRewind() { return m_Rewind; }
 
 		Mesh* BoxMesh;
 		Mesh* SegmentMesh;
@@ -40,6 +42,7 @@ namespace fmega {
 		RestartManager* m_RestartManager;
 		PlatformManager* m_PlatformManager;
 		Skybox* m_Skybox = nullptr;
+		RewindManager* m_Rewind;
 	};
 
 }

@@ -8,7 +8,7 @@
 
 namespace fmega {
 
-	enum class PlatformType {
+	enum class PlatformType : uint {
 		FUEL_LOSS,
 		FUEL_GAIN,
 		SPEED_BOOST,
@@ -26,13 +26,22 @@ namespace fmega {
 		virtual void Update(float delta) override;
 		virtual void Render(float delta) override;
 
+		virtual byte* GetData(uint& size) override;
+
 		void OnTouched();
 
 		static hsv TypeToColor(PlatformType type);
 
 		const float Length;
 		const float Width;
-		PlatformType Type;
+
+		union {
+			struct {
+				PlatformType Type;
+				glm::vec4 Color;
+			};
+			byte Data[20];
+		};
 
 		static const float StartingZ;
 		static const float QualityPerUnit;
@@ -46,7 +55,6 @@ namespace fmega {
 		Mesh* m_Mesh;
 		GPUBuffer* m_VBO;
 		GPUBuffer* m_IBO;
-		glm::vec4 m_Color;
 	};
 
 }

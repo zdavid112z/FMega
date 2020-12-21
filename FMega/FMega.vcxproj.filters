@@ -195,9 +195,6 @@
     <ClInclude Include="src\fmega\gameOverEvent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\fmega\skybox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\fmega\cameras\fpCamera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -208,6 +205,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\fmega\platformManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fmega\entities\skybox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fmega\rewindManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -317,9 +320,6 @@
     <ClCompile Include="src\fmega\restartManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\fmega\skybox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\fmega\cameras\fpCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -330,6 +330,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\fmega\platformManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fmega\entities\skybox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fmega\rewindManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

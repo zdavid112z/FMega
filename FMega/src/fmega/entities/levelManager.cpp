@@ -11,6 +11,7 @@ namespace fmega {
 	LevelManager::LevelManager(const std::string& name, Entity* parent, FMegaScene* scene) :
 		FMegaEntity(name, parent, scene)
 	{
+		m_PlatformId = 0;
 		m_CurrentZ = 0.0f;
 		m_SpawnZ = -100.f;
 	
@@ -36,6 +37,11 @@ namespace fmega {
 		
 	}
 
+	byte* LevelManager::GetData(uint& size) {
+		size = sizeof(m_Data);
+		return m_Data;
+	}
+
 	void LevelManager::Update(float delta)
 	{
 		m_CurrentZ += delta * m_FMegaScene->MoveSpeed;
@@ -57,7 +63,7 @@ namespace fmega {
 		for (int i = 0; i < numPositions; i++) {
 			if (configuration & (1 << i)) {
 				int width = Random::NextInt(0, m_PlatformWidths.size());
-				Platform* p = new Platform("Platform", nullptr, m_FMegaScene,
+				Platform* p = new Platform(std::to_string(m_PlatformId++), nullptr, m_FMegaScene,
 					m_PlatformPositions[i],
 					m_CurrentZ, m_PlatformWidths[width],
 					length, types.back());
