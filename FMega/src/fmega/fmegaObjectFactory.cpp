@@ -158,24 +158,34 @@ namespace fmega {
 
 	PlatformData FMegaObjectFactory::GenPlatformData(
 		int gridWidth, 
-		int gridLength, 
+		int gridLength,
+		int gridHeight,
 		float width, 
 		float length,
+		float height,
 		float randomness) {
 
 		PlatformData data;
 		data.gridWidth = gridWidth;
 		data.gridLength = gridLength;
+		data.gridHeight = gridHeight;
 		data.width = width;
 		data.length = length;
+		data.height = height;
 
-		for (int i = 0; i <= gridLength; i++) {
-			for (int j = 0; j <= gridWidth; j++) {
-				float onEdge = i == 0 || i == gridLength || j == 0 || j == gridWidth;
-				float z = (-float(i) / gridLength) * length;
-				float x = (float(j) / gridWidth  - 0.5f) * width;
-				data.topPositions.push_back(glm::vec2(x, z) + (1.f - onEdge) * (Random::NextVec2() * 2.f - 1.f) * randomness);
-				data.bottomPositions.push_back(glm::vec2(x, z) + (1.f - onEdge) * (Random::NextVec2() * 2.f - 1.f) * randomness);
+		for (int h = 0; h <= gridHeight; h++) {
+			for (int i = 0; i <= gridLength; i++) {
+				for (int j = 0; j <= gridWidth; j++) {
+					float onEdgeX = j == 0 || j == gridWidth;
+					float onEdgeY = h == 0 || h == gridHeight;
+					float onEdgeZ = i == 0 || i == gridLength;
+					glm::vec3 onEdge = glm::vec3(onEdgeX, onEdgeY, onEdgeZ);
+					glm::vec3 noise = (1.f - onEdge) * (Random::NextVec3() * 2.f - 1.f) * randomness;
+					float z = (-float(i) / gridLength) * length;
+					float x = (float(j) / gridWidth - 0.5f) * width;
+					float y = (-float(h) / gridHeight) * height;
+					data.positions.push_back(glm::vec3(x, y, z) + noise);
+				}
 			}
 		}
 
@@ -186,27 +196,31 @@ namespace fmega {
 		PlatformVertex* vertices,
 		uint32* indices,
 		int gridWidth, 
-		int gridLength, 
+		int gridLength,
+		int gridHeight,
 		float width, 
-		float length, 
+		float length,
+		float height,
 		float randomness, 
-		float thickness,
 		const glm::vec3& color,
 		float colorRandomness,
 		float startingZ,
 		glm::vec2 xyRandomness) {
 
-		PlatformData data = GenPlatformData(gridWidth, gridLength, width, length, randomness);
+		PlatformData data = GenPlatformData(gridWidth, gridLength, gridHeight, width, length, height, randomness);
 		uint32 numVertices = 0;
 		uint32 numIndices = 0;
 
-		for (int i = 0; i < gridLength; i++) {
-			for (int j = 0; j < gridWidth; j++) {
-				int type = Random::NextUint(0, 2);
-				glm::vec4 newColor1 = glm::vec4(color, 0) + glm::vec4(Random::NextFloat() * colorRandomness, Random::NextFloat() * colorRandomness, Random::NextFloat() * colorRandomness, 1);
-				glm::vec4 newColor2 = glm::vec4(color, 0) + glm::vec4(Random::NextFloat() * colorRandomness, Random::NextFloat() * colorRandomness, Random::NextFloat() * colorRandomness, 1);
-				GenFragment(vertices, numVertices, indices, numIndices, data, newColor1, j, i, thickness, startingZ, xyRandomness, (FragmentType)(type * 2 + 0));
-				GenFragment(vertices, numVertices, indices, numIndices, data, newColor2, j, i, thickness, startingZ, xyRandomness, (FragmentType)(type * 2 + 1));
+		for (int h = 0; h < gridHeight; h++) {
+			for (int i = 0; i < gridLength; i++) {
+				for (int j = 0; j < gridWidth; j++) {
+					bool flip = Random::NextUint(0, 2) == 0;
+					flip = false;
+					for (int k = 0; k < 6; k++) {
+						glm::vec4 newColor = glm::vec4(color, 0) + glm::vec4(Random::NextFloat() * colorRandomness, Random::NextFloat() * colorRandomness, Random::NextFloat() * colorRandomness, 1);
+						GenFragment(vertices, numVertices, indices, numIndices, data, newColor, j, h, i, startingZ, xyRandomness, k, flip);
+					}
+				}
 			}
 		}
 	}
@@ -220,7 +234,7 @@ namespace fmega {
 		return GenObject(vertices, indices, PrimitiveType::TRIANGLES, numInstances);
 	}
 
-	// adds 18 vertices & 24 indices
+	// adds 12 vertices & 12 indices
 	void FMegaObjectFactory::GenFragment(
 		PlatformVertex* vertices,
 		uint32& numVertices,
@@ -228,33 +242,28 @@ namespace fmega {
 		uint32& numIndices,
 		const PlatformData& data,
 		const glm::vec4& color,
-		int gridX, int gridZ,
-		float thickness,
+		int gridX, int gridY, int gridZ,
 		float startingZ,
 		glm::vec2 xyRandomness,
-		FragmentType type) {
+		int typeId, bool flip) {
 
-		std::vector<int> inds;
-		switch (type)
-		{
-		case fmega::FragmentType::TRIANGLE_11:
-			inds = { 0, 1, 2 };
-			break;
-		case fmega::FragmentType::TRIANGLE_12:
-			inds = { 1, 3, 2 };
-			break;
-		case fmega::FragmentType::TRIANGLE_21:
-			inds = { 0, 1, 3 };
-			break;
-		case fmega::FragmentType::TRIANGLE_22:
-			inds = { 0, 3, 2 };
-			break;
-		default:
-			break;
+		int allInds[6][4] = {
+			{ 0, 1, 3, 5 },
+			{ 0, 3, 4, 5 },
+			{ 3, 4, 5, 7 },
+			{ 0, 2, 3, 6 },
+			{ 0, 3, 4, 6 },
+			{ 3, 4, 5, 7 }
+		};
+		std::vector<int> inds(allInds[typeId], allInds[typeId] + 4);
+		if (flip) {
+			for (int& id : inds) {
+				id ^= 1;
+			}
 		}
 
-		glm::vec4 positions[6];
-		glm::vec4 localOrigin = glm::vec4(0);
+		glm::vec4 positions[4];
+		glm::vec3 localOrigin = glm::vec3(0);
 		glm::quat initialRotation = glm::quat(glm::vec3(
 			Random::NextFloat() * glm::two_pi<float>(),
 			Random::NextFloat() * glm::two_pi<float>(),
@@ -263,21 +272,57 @@ namespace fmega {
 			Random::NextFloat() * xyRandomness.x - xyRandomness.x / 2.f,
 			Random::NextFloat() * xyRandomness.y, startingZ, 1.f);
 
-		for (int i = 0; i < 3; i++) {
-			int indX = gridX + inds[i] % 2;
-			int indZ = gridZ + inds[i] / 2;
+		int sz = data.gridWidth + 1;
+		int sy = (data.gridWidth + 1) * (data.gridLength + 1);
+		for (int i = 0; i < 4; i++) {
+			int dx = (inds[i] & 1) != 0;
+			int dy = (inds[i] & 4) != 0;
+			int dz = (inds[i] & 2) != 0;
+			int indX = gridX + dx;
+			int indY = gridY + dy;
+			int indZ = gridZ + dz;
+			int ind = indX + indZ * sz + indY * sy;
 
-			glm::vec2 pt = data.topPositions[indX + indZ * (data.gridWidth + 1)];
-			glm::vec2 pb = data.bottomPositions[indX + indZ * (data.gridWidth + 1)];
-			positions[i * 2 + 0] = glm::vec4(pt.x, 0, pt.y, 1);
-			positions[i * 2 + 1] = glm::vec4(pb.x, -thickness, pb.y, 1);
+			glm::vec4 pc = glm::vec4(data.positions[ind], 1.0f);
+			positions[i] = pc;
 
-			localOrigin += positions[i * 2 + 0];
-			localOrigin += positions[i * 2 + 1];
+			localOrigin += glm::vec3(pc);
 		}
 
-		localOrigin /= 6.f;
+		localOrigin /= 4.f;
 
+		for (int i = 0; i < 4; i++) {
+			int indStart = numVertices;
+			PlatformVertex p[3];
+			glm::vec3 faceCenter = glm::vec3(0.f);
+			for (int j = 0; j < 3; j++) {
+				p[j].position = positions[(i + j) % 4];
+				faceCenter += glm::vec3(p[j].position);
+			}
+			faceCenter /= 3.f;
+			glm::vec3 objToFace = glm::normalize(faceCenter - localOrigin);
+			glm::vec3 normal = GetNormal(p[0].position, p[1].position, p[2].position);
+			float d = glm::dot(normal, objToFace);
+			if (d < 0) {
+				normal = -normal;
+				std::swap(p[0], p[1]);
+			}
+
+			for (int j = 0; j < 3; j++) {
+				p[j].position -= glm::vec4(localOrigin, 0.f);
+				p[j].localOrigin = glm::vec4(localOrigin, 1.f);
+				p[j].color = color;
+				p[j].normal = glm::vec4(normal, 0);
+				p[j].initialRotation = initialRotation;
+				p[j].initialPosition = initialPosition;
+				vertices[numVertices++] = p[j];
+			}
+			indices[numIndices++] = indStart + 0;
+			indices[numIndices++] = indStart + 1;
+			indices[numIndices++] = indStart + 2;
+		}
+
+		/*
 		// Sides
 		for (int i = 0; i < 3; i++) {
 			int indStart = numVertices;
@@ -328,7 +373,7 @@ namespace fmega {
 			indices[numIndices++] = indStart + 0;
 			indices[numIndices++] = indStart + 1;
 			indices[numIndices++] = indStart + 2;
-		}
+		}*/
 
 	}
 

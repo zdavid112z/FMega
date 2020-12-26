@@ -9,7 +9,7 @@
 namespace fmega {
 
 	const float Platform::StartingZ = -30.f;
-	const float Platform::QualityPerUnit = 2.0f;
+	const float Platform::QualityPerUnit = 1.5f;
 	const float Platform::PlatformRandomness = 0.8f;
 	const float Platform::PlatformThickness = 0.5f;
 	const float Platform::PlatformColorRandomness = 0.1f;
@@ -22,8 +22,8 @@ namespace fmega {
 		m_Mesh = nullptr;
 		int gridWidth = int(width * QualityPerUnit);
 		int gridLength = int(length * QualityPerUnit);
-		uint32 numVertices = gridWidth * gridLength * 18 * 2;
-		uint32 numIndices = gridWidth * gridLength * 24 * 2;
+		uint32 numVertices = gridWidth * gridLength * 1 * 12 * 6;
+		uint32 numIndices =  gridWidth * gridLength * 1 * 12 * 6;
 		m_NumIndices = numIndices;
 		m_IBO = new GPUBuffer(BufferType::ELEMENT_ARRAY, nullptr, numIndices * sizeof(uint32), BufferUsage::STATIC_DRAW);
 		m_VBO = new GPUBuffer(BufferType::ARRAY, nullptr, numVertices * sizeof(PlatformVertex), BufferUsage::STATIC_DRAW);
@@ -34,10 +34,11 @@ namespace fmega {
 		PlatformGenData data = {
 			gridWidth,
 			gridLength,
+			1,
 			width,
 			length,
-			PlatformRandomness * 0.5f / QualityPerUnit,
 			PlatformThickness,
+			PlatformRandomness * 0.5f / QualityPerUnit,
 			glm::vec3(0),
 			PlatformColorRandomness,
 			StartingZ,

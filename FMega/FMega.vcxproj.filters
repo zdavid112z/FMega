@@ -213,6 +213,9 @@
     <ClInclude Include="src\fmega\rewindManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\fmega\entities\wall.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -336,6 +339,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\fmega\rewindManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fmega\entities\wall.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

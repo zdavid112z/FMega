@@ -46,15 +46,15 @@ namespace fmega {
 	}
 
 	void FMegaScene::Restart() {
-		if (m_PlatformManager != nullptr) {
-			delete m_PlatformManager;
-		}
-		m_PlatformManager = new PlatformManager();
-
 		for (auto e : m_Entities) {
 			delete e;
 		}
 		m_Entities.clear();
+
+		if (m_PlatformManager != nullptr) {
+			delete m_PlatformManager;
+		}
+		m_PlatformManager = new PlatformManager();
 
 		m_Skybox = new Skybox("Skybox", nullptr, this);
 		AddEntity(m_Skybox);

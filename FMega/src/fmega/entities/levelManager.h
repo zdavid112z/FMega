@@ -15,6 +15,7 @@ namespace fmega {
 
 		virtual byte* GetData(uint& size) override;
 	private:
+		void SpawnWall(float x, float z, float width);
 		void SpawnPlatforms();
 		void GenerateNextConfiguration();
 		PlatformType GeneratePlatform(
@@ -39,6 +40,7 @@ namespace fmega {
 		std::vector<float> m_GoodPlatformChances;
 		std::vector<float> m_BadPlatformChances;
 		float m_BadPlatformChance;
+		float m_WallChance;
 		std::vector<PlatformType> m_GoodPlatforms;
 		std::vector<PlatformType> m_BadPlatforms;
 		std::vector<float> m_PlatformWidths;

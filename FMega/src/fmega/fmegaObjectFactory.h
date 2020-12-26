@@ -33,20 +33,20 @@ namespace fmega {
 	#pragma pack(pop)
 
 	struct PlatformData {
-		float width = 0.f, length = 0.f;
-		int gridWidth = 0, gridLength = 0;
-		std::vector<glm::vec2> topPositions;
-		std::vector<glm::vec2> bottomPositions;
+		float width = 0.f, length = 0.f, height = 0.f;
+		int gridWidth = 0, gridLength = 0, gridHeight = 0;
+		std::vector<glm::vec3> positions;
 	};
 
 	struct PlatformGenData {
 
 		int gridWidth;
 		int gridLength;
+		int gridHeight;
 		float width;
 		float length;
+		float height;
 		float randomness;
-		float thickness;
 		glm::vec3 color;
 		float colorRandomness;
 		float startingZ;
@@ -54,13 +54,6 @@ namespace fmega {
 
 		PlatformVertex* vertices;
 		uint32* indices;
-	};
-
-	enum class FragmentType {
-		TRIANGLE_11 = 0,
-		TRIANGLE_12 = 1,
-		TRIANGLE_21 = 2,
-		TRIANGLE_22 = 3,
 	};
 
 	class FMegaObjectFactory {
@@ -76,9 +69,9 @@ namespace fmega {
 		static void GenPlatformMeshData(
 			PlatformVertex* vertices,
 			uint32* indices,
-			int gridWidth, int gridLength, 
-			float width, float length, 
-			float randomness, float thickness, 
+			int gridWidth, int gridLength, int gridHeight,
+			float width, float length, float height,
+			float randomness,
 			const glm::vec3& color,
 			float colorRandomness,
 			float startingZ,
@@ -89,10 +82,12 @@ namespace fmega {
 			const glm::vec3& p2,
 			const glm::vec3& p3);
 		static PlatformData GenPlatformData(
-			int gridWidth, 
-			int gridLength, 
-			float width, 
-			float length, 
+			int gridWidth,
+			int gridLength,
+			int gridHeight,
+			float width,
+			float length,
+			float height,
 			float randomness);
 		static void GenFragment(
 			PlatformVertex* vertices,
@@ -101,11 +96,10 @@ namespace fmega {
 			uint32& numIndices,
 			const PlatformData& data,
 			const glm::vec4& color,
-			int gridX, int gridZ,
-			float thickness,
+			int gridX, int gridY, int gridZ,
 			float startingZ,
 			glm::vec2 xyRandomness,
-			FragmentType type);
+			int typeId, bool flip);
 		static void GenSphere(
 			std::vector<ColorVertex>& vertices,
 			std::vector<uint32>& indices,

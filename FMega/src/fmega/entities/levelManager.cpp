@@ -5,6 +5,7 @@
 #include "fmega/fmegaRenderer.h"
 #include "utils/random.h"
 #include "platform.h"
+#include "wall.h"
 
 namespace fmega {
 
@@ -17,6 +18,7 @@ namespace fmega {
 	
 		m_CurrentPlatform = 0;
 		m_FuelBonusInterval = 3;
+		m_WallChance = 0.35f;
 
 		m_GoodPlatforms = { PlatformType::PLAIN, PlatformType::FUEL_GAIN };
 		m_BadPlatforms = { PlatformType::DEATH, PlatformType::FUEL_LOSS, PlatformType::SPEED_BOOST };
@@ -67,11 +69,22 @@ namespace fmega {
 					m_PlatformPositions[i],
 					m_CurrentZ, m_PlatformWidths[width],
 					length, types.back());
+				if (types.back() == PlatformType::PLAIN || types.back() == PlatformType::FUEL_GAIN) {
+					float wallValue = Random::NextFloat();
+					if (wallValue <= m_WallChance) {
+						SpawnWall(m_PlatformPositions[i], m_CurrentZ  - length / 2.f, m_PlatformWidths[width]);
+					}
+				}
 				types.pop_back();
 				m_FMegaScene->AddEntity(p);
 			}
 		}
 		m_CurrentZ -= length + distance;
+	}
+
+	void LevelManager::SpawnWall(float x, float z, float width) {
+		Wall* w = new Wall(std::to_string(m_PlatformId++), nullptr, m_FMegaScene, x, z, width);
+		m_FMegaScene->AddEntity(w);
 	}
 
 	void LevelManager::GenerateNextConfiguration() {

@@ -28,9 +28,9 @@ namespace fmega {
 				PlatformGenData& data = m_CurrentData;
 				FMegaObjectFactory::GenPlatformMeshData(
 					data.vertices, data.indices,
-					data.gridWidth, data.gridLength,
-					data.width, data.length,
-					data.randomness, data.thickness,
+					data.gridWidth, data.gridLength, data.gridHeight,
+					data.width, data.length, data.height,
+					data.randomness,
 					data.color, data.colorRandomness,
 					data.startingZ, data.xyRandomness);
 				m_IsDone = true;
