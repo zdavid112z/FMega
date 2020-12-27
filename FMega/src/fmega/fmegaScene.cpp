@@ -27,6 +27,7 @@ namespace fmega {
 		BoxMesh = FMegaObjectFactory::GenBox(1024);
 		SegmentMesh = FMegaObjectFactory::GenSegment(64);
 		SphereMesh = FMegaObjectFactory::GenSphere(1);
+		PickupMesh = FMegaObjectFactory::GenPickup(128);
 		m_Renderer = new FMegaRenderer(this, m_PlayerRadius);
 		m_Rewind = new RewindManager(this, 180, 4.f);
 
@@ -64,6 +65,7 @@ namespace fmega {
 
 	FMegaScene::~FMegaScene()
 	{
+		delete PickupMesh;
 		delete m_Rewind;
 		delete m_PlatformManager;
 		delete m_RestartManager;
@@ -131,6 +133,7 @@ namespace fmega {
 			m_Skybox->SkyboxRender(adjDelta);
 		}
 		Scene::Render(adjDelta);
+		m_Renderer->RenderAll();
 		m_RestartManager->Render(delta);
 		m_Renderer->RenderAll();
 

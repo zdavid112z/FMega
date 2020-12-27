@@ -16,7 +16,5 @@ void main()
 	amount = int(amount * 5.0) / 5.0;
 	float fogAmount = smoothstep(-70, -85, vData.vZ);
 	vec4 diffuse = vData.vColor * (amount * 0.2 + 0.8);
-	// vec4 fogColor = vec4(0.1, 0.15, 0.3, 1.0);
-	// outFragColor = mix(diffuse, fogColor, fogAmount);
 	outFragColor = vec4(diffuse.xyz, 1.0 - fogAmount);
 }

@@ -19,16 +19,22 @@ layout(std140) uniform DynamicSceneBuffer
 
 out VertexData
 {
-	vec4 vPosition;
-	vec3 vEyePosition;
-	float vCameraOffset;
+    vec3 vPosition;
+	vec2 vUV;
+	float vTexOpacity;
+	vec3 vNormal;
+	vec4 vColor;
 } vData;
 
 void main()
 {
-	vec4 pos = vec4(aPosition.xy, 0.999, 1.0);
-    gl_Position = pos;
-	vData.vPosition = uInvViewProjection * pos;
-	vData.vEyePosition = uEyePosition;
-	vData.vCameraOffset = uCameraOffset;
+	vec4 worldPos = aModel * vec4(aPosition.xyz, 1.0);
+	vec4 worldNormal = aModel * vec4(aNormal.xyz, 0.0);
+	vec4 color = vec4(mix(aColor.rgb, aObjectColor.rgb, aObjectColor.a), aColor.a * aOpacity.x);
+	gl_Position = uViewProjection * worldPos;
+	vData.vPosition = worldPos.xyz;
+	vData.vUV = aUV.xy;
+	vData.vNormal = worldNormal.xyz;
+	vData.vColor = color;
+	vData.vTexOpacity = aOpacity.y;
 }

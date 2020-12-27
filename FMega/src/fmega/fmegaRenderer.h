@@ -38,6 +38,12 @@ namespace fmega {
 	};
 	#pragma pack(pop)
 
+	enum class MeshType : uint {
+		MESH_2D,
+		MESH_3D,
+		COUNT
+	};
+
 	class FMegaRenderer {
 	public:
 		using QueueType = std::map< std::pair<bool, Mesh*>, std::vector<MeshRenderData> >;
@@ -46,7 +52,7 @@ namespace fmega {
 		~FMegaRenderer();
 
 		void Prepare(float delta, float skyboxOffset);
-		void RenderMesh(Mesh* mesh, MeshRenderData data, bool isUI = false);
+		void RenderMesh(Mesh* mesh, MeshRenderData data, bool isUI = false, MeshType type = MeshType::MESH_2D, bool isTransparent = false);
 		void RenderDigit(Mesh* segment, MeshRenderData data, int digit);
 		void RenderAll();
 		void RenderPlatform(Mesh* mesh, const glm::mat4& model, const glm::vec4& color);
@@ -55,7 +61,8 @@ namespace fmega {
 		void SetShake(bool shake);
 
 	private:
-		void RenderMesh(QueueType::iterator&, bool bindShader);
+		void RenderMesh(QueueType::iterator&, bool bindShader, MeshType type);
+		void BindShader(MeshType type);
 
 	public:
 		float m_ShakeTime;
@@ -66,10 +73,10 @@ namespace fmega {
 		GPUBuffer* m_DynamicSceneBuffer;
 		GPUBuffer* m_StaticPlayerBuffer;
 		Shader* m_SkyboxShader;
-		Shader* m_SimpleShader;
 		Shader* m_PlatformShader;
 		Shader* m_PlayerShader;
-		QueueType m_Queue;
+		Shader* m_Shaders[uint(MeshType::COUNT)];
+		QueueType m_Queue[uint(MeshType::COUNT)][2];
 	};
 
 }

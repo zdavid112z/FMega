@@ -33,11 +33,12 @@ namespace fmega {
 		void HandleCollision(Platform* p, float delta);
 		void UpdateSceneSpeed();
 
-		Mesh* m_Box;
 		GameCamera* m_Cameras[2];
 
 		union {
 			struct {
+				int m_NumLives;
+
 				float m_Fuel;
 				int m_SpeedIndex;
 				float m_MaxSpeedTimer;

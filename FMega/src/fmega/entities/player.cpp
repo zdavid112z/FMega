@@ -33,14 +33,14 @@ namespace fmega {
 		m_MaxSpeedColor(glm::vec4(1, 0, 0, 1)),
 		m_JumpVelocity(sqrt(2 * m_RiseGravity * m_JumpMaxHeight)),
 		m_OnLandHeightImpulse(4.f),
-		m_PlayerZ(-4.f)
+		m_PlayerZ(-4.f),
+		m_NumLives(3)
 	{
 		m_CameraIndex = 0;
 		m_Fuel = m_MaxFuel;
 		m_SpeedIndex = 1;
 		
 		m_MaxSpeedTimer = 0.f;
-		m_Box = m_FMegaScene->BoxMesh;
 
 		m_BottomY = 2.f;
 		m_Height = 1.f;
@@ -73,6 +73,8 @@ namespace fmega {
 		
 		m_Cameras[m_CameraIndex]->OnRefocus();
 		m_FMegaScene->SetCamera(m_Cameras[m_CameraIndex]->GetCamera());
+
+		UpdateSceneSpeed();
 	}
 
 	Player::~Player()
@@ -340,7 +342,8 @@ namespace fmega {
 			data.model = glm::translate(glm::mat4(1.f), glm::vec3(-16.f + fuelAmount * 16.f, -9.f + m_FuelBoxHeight / 2.f, 0)) *
 				glm::scale(glm::mat4(1.f), glm::vec3(fuelAmount * 16.f, m_FuelBoxHeight / 2.f, 1));
 			data.color = m_FuelColor;
-			data.opacity = glm::vec4(1.f);
+			data.opacity = 1.f;
+			data.textureOpacity = 0.f;
 			m_FMegaScene->GetRenderer()->RenderMesh(m_FMegaScene->BoxMesh, data, true);
 		}
 
@@ -349,7 +352,8 @@ namespace fmega {
 			data.model = glm::translate(glm::mat4(1.f), glm::vec3(16.f - (1.f - fuelAmount) * 16.f, -9.f + m_FuelBoxHeight / 2.f, 0)) *
 				glm::scale(glm::mat4(1.f), glm::vec3((1.f - fuelAmount) * 16.f, m_FuelBoxHeight / 2.f, 1));
 			data.color = m_FuelEmptyColor;
-			data.opacity = glm::vec4(1.f);
+			data.opacity = 1.f;
+			data.textureOpacity = 0.f;
 			m_FMegaScene->GetRenderer()->RenderMesh(m_FMegaScene->BoxMesh, data, true);
 		}
 
@@ -358,7 +362,8 @@ namespace fmega {
 			data.model = glm::translate(glm::mat4(1.f), glm::vec3(0, -9.f + m_FuelBoxHeight + m_MaxSpeedHeight / 2.f, 0)) *
 				glm::scale(glm::mat4(1.f), glm::vec3(16.f, m_MaxSpeedHeight / 2.f, 1));
 			data.color = glm::vec4(glm::sin(m_MaxSpeedFlicker * m_FMegaScene->GetGame()->GetTime()) * 0.3f + 0.7f, 0.2f, 0.2f, 1.0f);
-			data.opacity = glm::vec4(1.f);
+			data.opacity = 1.f;
+			data.textureOpacity = 0.f;
 			m_FMegaScene->GetRenderer()->RenderMesh(m_FMegaScene->BoxMesh, data, true);
 		}
 

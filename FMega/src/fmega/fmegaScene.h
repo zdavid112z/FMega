@@ -31,6 +31,7 @@ namespace fmega {
 		Mesh* BoxMesh;
 		Mesh* SegmentMesh;
 		Mesh* SphereMesh;
+		Mesh* PickupMesh;
 		float MoveSpeed;
 		Camera* UICamera;
 	protected:

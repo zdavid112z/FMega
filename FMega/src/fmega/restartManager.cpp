@@ -39,7 +39,8 @@ namespace fmega {
 					MeshRenderData data;
 					data.model = model;
 					data.color = r.color;
-					data.opacity = glm::vec4(1.f);
+					data.opacity = 1.f;
+					data.textureOpacity = 0.f;
 					m_Scene->GetRenderer()->RenderMesh(m_Scene->BoxMesh, data, true);
 				}
 			}

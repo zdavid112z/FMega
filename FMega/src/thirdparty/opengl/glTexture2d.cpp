@@ -108,6 +108,8 @@ namespace fmega {
 		glTexImage2D(GL_TEXTURE_2D, 0, iformat, image.width, image.height, 0, format, type, image.data);
 		if (generateMipmaps)
 			glGenerateMipmap(GL_TEXTURE_2D);
+		m_Width = image.width;
+		m_Height = image.height;
 	}
 
 	GLTexture2D::~GLTexture2D()

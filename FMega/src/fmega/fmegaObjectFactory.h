@@ -10,14 +10,32 @@ namespace fmega {
 	struct MeshRenderData {
 		glm::mat4 model = glm::mat4(1);
 		glm::vec4 color = glm::vec4(0);
-		glm::vec4 opacity = glm::vec4(1);
+		union {
+			struct {
+				float opacity;
+				float textureOpacity;
+				float unused1;
+				float unused2;
+			};
+			glm::vec4 opacityVec = glm::vec4(1, 0, 0, 0);
+		};
 	};
 
 	struct ColorVertex {
 		ColorVertex() {}
-		ColorVertex(const glm::vec3& position, const glm::vec4& color, const glm::vec3& normal = glm::vec3(0, 1, 0))
-			: position(glm::vec4(position, 1.f)), color(color), normal(glm::vec4(normal, 0)) {}
+		ColorVertex(
+			const glm::vec3& position, 
+			const glm::vec4& color, 
+			const glm::vec3& normal = glm::vec3(0, 1, 0),
+			const glm::vec2& uv = glm::vec2(0, 0)) : 
+
+			position(glm::vec4(position, 1.f)), 
+			color(color), 
+			normal(glm::vec4(normal, 0)), 
+			uv(glm::vec4(uv, 0, 0)) {}
+
 		glm::vec4 position = glm::vec4(0);
+		glm::vec4 uv = glm::vec4(0);
 		glm::vec4 color = glm::vec4(0);
 		glm::vec4 normal = glm::vec4(0, 1, 0, 0);
 	};
@@ -66,6 +84,7 @@ namespace fmega {
 		static Mesh* GenSegment(uint32 numInstances);
 		static Mesh* GenHeart(uint32 numInstances);
 		static Mesh* GenSphere(uint32 numInstances);
+		static Mesh* GenPickup(uint32 numInstances);
 		static void GenPlatformMeshData(
 			PlatformVertex* vertices,
 			uint32* indices,
@@ -107,6 +126,36 @@ namespace fmega {
 			const glm::vec3& center,
 			float radius,
 			int quality);
+		static void GenSmoothCube(
+			std::vector<ColorVertex>& vertices,
+			std::vector<uint32>& indices,
+			const glm::vec4& color,
+			const glm::vec3& center,
+			float size,
+			int quality,
+			float smoothAmount);
+		static void GenSmoothCubeFacesAndNormals(
+			int quality, 
+			std::map<std::tuple<int, int, int>, int>& posToId, 
+			std::vector<ColorVertex>& vertices, 
+			std::vector<uint32>& indices);
+		static void GenSmoothCubeVertexPositions(
+			int quality, 
+			std::map<std::tuple<int, int, int>, int>& posToId, 
+			float smoothAmount, 
+			const glm::vec4& color, 
+			std::vector<ColorVertex>& vertices,
+			float size);
+		static void GenPosToId(
+			int indStart,
+			int quality, 
+			std::map<std::tuple<int, int, int>, int>& posToId, 
+			int& nextId);
+		static void GenFace(
+			std::vector<ColorVertex>& vertices,
+			std::vector<uint32>& indices,
+			int v0, int v1, int v2,
+			bool isOutward);
 		static void GenLine(
 			std::vector<ColorVertex>& vertices,
 			std::vector<uint32>& indices,

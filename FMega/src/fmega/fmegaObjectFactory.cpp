@@ -24,6 +24,165 @@ namespace fmega {
 		return GenObject(vertices, indices, PrimitiveType::TRIANGLES, numInstances);
 	}
 
+	Mesh* FMegaObjectFactory::GenPickup(uint32 numInstances) {
+		std::vector<ColorVertex> vertices;
+		std::vector<uint32> indices;
+
+		GenSmoothCube(vertices, indices, glm::vec4(1, 1, 1, 1), glm::vec3(0), 1.f, 12, 1.f);
+
+		return GenObject(vertices, indices, PrimitiveType::TRIANGLES, numInstances);
+	}
+
+	void FMegaObjectFactory::GenSmoothCube(
+		std::vector<ColorVertex>& vertices,
+		std::vector<uint32>& indices,
+		const glm::vec4& color,
+		const glm::vec3& center,
+		float size,
+		int quality,
+		float smoothAmount) {
+
+		int indStart = vertices.size();
+
+		int nextId = 0;
+		std::map<std::tuple<int, int, int>, int> posToId;
+
+		GenPosToId(indStart, quality, posToId, nextId);
+		vertices.resize(vertices.size() + nextId);
+
+		GenSmoothCubeVertexPositions(quality, posToId, smoothAmount, color, vertices, size);
+		GenSmoothCubeFacesAndNormals(quality, posToId, vertices, indices);
+	}
+
+	void FMegaObjectFactory::GenSmoothCubeFacesAndNormals(int quality, std::map<std::tuple<int, int, int>, int>& posToId, std::vector<fmega::ColorVertex>& vertices, std::vector<uint32>& indices)
+	{
+		for (int f = 0; f < 6; f++) {
+			for (int i = 0; i < quality - 1; i++) {
+				for (int j = 0; j < quality - 1; j++) {
+					glm::ivec3 c;
+					glm::ivec3 d1, d2;
+					switch (f)
+					{
+					case 0: c = glm::ivec3(i, j, 0);           d1 = glm::ivec3(1, 0, 0); d2 = glm::ivec3(0, 1, 0); break;
+					case 1: c = glm::ivec3(i, j, quality - 1); d1 = glm::ivec3(1, 0, 0); d2 = glm::ivec3(0, 1, 0); break;
+					case 2: c = glm::ivec3(i, 0, j);           d1 = glm::ivec3(1, 0, 0); d2 = glm::ivec3(0, 0, 1); break;
+					case 3: c = glm::ivec3(i, quality - 1, j); d1 = glm::ivec3(1, 0, 0); d2 = glm::ivec3(0, 0, 1); break;
+					case 4: c = glm::ivec3(0, i, j);           d1 = glm::ivec3(0, 1, 0); d2 = glm::ivec3(0, 0, 1); break;
+					case 5: c = glm::ivec3(quality - 1, i, j); d1 = glm::ivec3(0, 1, 0); d2 = glm::ivec3(0, 0, 1); break;
+					}
+					glm::ivec3 coords[4] = {
+						c, c + d1, c + d2, c + d1 + d2
+					};
+					int ids[4];
+					for (int k = 0; k < 4; k++) {
+						ids[k] = posToId[std::make_tuple(coords[k].x, coords[k].y, coords[k].z)];
+					}
+					GenFace(vertices, indices, ids[0], ids[1], ids[2], true);
+					GenFace(vertices, indices, ids[1], ids[2], ids[3], true);
+				}
+			}
+		}
+
+		for (auto it : posToId) {
+			vertices[it.second].normal = glm::normalize(vertices[it.second].normal);
+		}
+	}
+
+	void FMegaObjectFactory::GenFace(
+		std::vector<ColorVertex>& vertices,
+		std::vector<uint32>& indices,
+		int v0, int v1, int v2,
+		bool isOutward) {
+
+		glm::vec3 p[3] = { vertices[v0].position, vertices[v1].position, vertices[v2].position };
+		glm::vec3 normal = GetNormal(p[0], p[1], p[2]);
+		glm::vec3 oToFaceCenter = (p[0] + p[1] + p[2]) / 3.f;
+		float d = glm::dot(normal, oToFaceCenter);
+		if ((d > 0) ^ isOutward) {
+			normal = -normal;
+			std::swap(v0, v1);
+		}
+
+		vertices[v0].normal += glm::vec4(normal, 0.f);
+		vertices[v1].normal += glm::vec4(normal, 0.f);
+		vertices[v2].normal += glm::vec4(normal, 0.f);
+
+		indices.push_back(v0);
+		indices.push_back(v1);
+		indices.push_back(v2);
+	}
+
+	void FMegaObjectFactory::GenSmoothCubeVertexPositions(
+		int quality, 
+		std::map<std::tuple<int, int, int>, int>& posToId, 
+		float smoothAmount, 
+		const glm::vec4& color, 
+		std::vector<fmega::ColorVertex>& vertices,
+		float size)
+	{
+		for (int i = 0; i < quality; i++) {
+			for (int j = 0; j < quality; j++) {
+				for (int k = 0; k < quality; k++) {
+					bool edgeI = i == 0 || i == quality - 1;
+					bool edgeJ = j == 0 || j == quality - 1;
+					bool edgeK = k == 0 || k == quality - 1;
+					if (!edgeI && !edgeJ && !edgeK) continue;
+
+					int myId = posToId[std::make_tuple(i, j, k)];
+
+					glm::vec3 sum = glm::vec3(0);
+					int count = 0;
+					/*for (int e = 0; e < 27; e++) {
+						if (e == 1 + 3 + 9) continue;
+						int ni = i + ((e / 1) % 3) - 1;
+						int nj = j + ((e / 3) % 3) - 1;
+						int nk = k + ((e / 9) % 3) - 1;
+						auto it = posToId.find(std::make_tuple(ni, nj, nk));
+						if (it == posToId.end()) continue;
+						count++;
+						sum += glm::vec3(ni, nj, nk) / float(quality - 1);
+					}*/
+					for (int e = 0; e < 125; e++) {
+						if (e == 1 + 5 + 25) continue;
+						int ni = i + ((e / 1) % 5)  - 2;
+						int nj = j + ((e / 5) % 5)  - 2;
+						int nk = k + ((e / 25) % 5) - 2;
+						auto it = posToId.find(std::make_tuple(ni, nj, nk));
+						if (it == posToId.end()) continue;
+						count++;
+						sum += glm::vec3(ni, nj, nk) / float(quality - 1);
+					}
+					sum /= count;
+					glm::vec3 op = glm::vec3(i, j, k) / float(quality - 1);
+					glm::vec3 p = glm::lerp(op, sum, smoothAmount);
+
+					ColorVertex v;
+					v.position = glm::vec4((p - glm::vec3(0.5f)) * size, 1.f);
+					v.color = color;
+					v.normal = glm::vec4(0.f);
+
+					vertices[myId] = v;
+				}
+			}
+		}
+	}
+
+	void FMegaObjectFactory::GenPosToId(int indStart, int quality, std::map<std::tuple<int, int, int>, int>& posToId, int& nextId)
+	{
+		for (int i = 0; i < quality; i++) {
+			for (int j = 0; j < quality; j++) {
+				for (int k = 0; k < quality; k++) {
+					bool edgeI = i == 0 || i == quality - 1;
+					bool edgeJ = j == 0 || j == quality - 1;
+					bool edgeK = k == 0 || k == quality - 1;
+					if (!edgeI && !edgeJ && !edgeK) continue;
+					posToId[std::make_tuple(i, j, k)] = nextId + indStart;
+					nextId++;
+				}
+			}
+		}
+	}
+
 	Mesh* FMegaObjectFactory::GenHeart(uint32 numInstances)
 	{
 		glm::vec4 color = glm::vec4(0.9f, 0.2f, 0.3f, 1);
@@ -532,6 +691,7 @@ namespace fmega {
 		m->SetIBO(ibo, indices.size());
 
 		m->AddBuffer(vbo);
+		m->PushToBufferFormat(MeshVariableType::FLOAT32, 4);
 		m->PushToBufferFormat(MeshVariableType::FLOAT32, 4);
 		m->PushToBufferFormat(MeshVariableType::FLOAT32, 4);
 		m->PushToBufferFormat(MeshVariableType::FLOAT32, 4);

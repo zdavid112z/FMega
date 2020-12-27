@@ -120,6 +120,7 @@
     <ClInclude Include="src\fmega\cameras\fpCamera.h" />
     <ClInclude Include="src\fmega\cameras\gameCamera.h" />
     <ClInclude Include="src\fmega\entities\levelManager.h" />
+    <ClInclude Include="src\fmega\entities\pickup.h" />
     <ClInclude Include="src\fmega\entities\platform.h" />
     <ClInclude Include="src\fmega\entities\player.h" />
     <ClInclude Include="src\fmega\cameras\tpCamera.h" />
@@ -187,6 +188,7 @@
     <ClCompile Include="src\fmega\cameras\fpCamera.cpp" />
     <ClCompile Include="src\fmega\cameras\gameCamera.cpp" />
     <ClCompile Include="src\fmega\entities\levelManager.cpp" />
+    <ClCompile Include="src\fmega\entities\pickup.cpp" />
     <ClCompile Include="src\fmega\entities\platform.cpp" />
     <ClCompile Include="src\fmega\entities\player.cpp" />
     <ClCompile Include="src\fmega\cameras\tpCamera.cpp" />
@@ -229,6 +231,8 @@
     <None Include="assets\shaders\player.vert" />
     <None Include="assets\shaders\simple.frag" />
     <None Include="assets\shaders\simple.vert" />
+    <None Include="assets\shaders\simple3d.frag" />
+    <None Include="assets\shaders\simple3d.vert" />
     <None Include="assets\shaders\skybox.frag" />
     <None Include="assets\shaders\skybox.vert" />
   </ItemGroup>

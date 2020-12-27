@@ -8,7 +8,8 @@ namespace fmega {
 	FMegaRenderer::FMegaRenderer(FMegaScene* scene, float playerRadius) :
 		m_Scene(scene)
 	{
-		m_SimpleShader = new Shader("assets/shaders/simple.vert", "assets/shaders/simple.frag", sizeof(glm::mat4));
+		m_Shaders[uint(MeshType::MESH_2D)] = new Shader("assets/shaders/simple.vert", "assets/shaders/simple.frag", sizeof(glm::mat4));
+		m_Shaders[uint(MeshType::MESH_3D)] = new Shader("assets/shaders/simple3d.vert", "assets/shaders/simple3d.frag", sizeof(glm::mat4));
 		m_PlatformShader = new Shader("assets/shaders/platform.vert", "assets/shaders/platform.frag", sizeof(DynamicPlatformBuffer));
 		m_PlayerShader = new Shader("assets/shaders/player.vert", "assets/shaders/player.frag", sizeof(DynamicPlayerBuffer));
 		m_SkyboxShader = new Shader("assets/shaders/skybox.vert", "assets/shaders/skybox.frag", 0);
@@ -34,44 +35,66 @@ namespace fmega {
 		delete m_StaticPlayerBuffer;
 		delete m_SkyboxShader;
 		delete m_PlayerShader;
-		delete m_SimpleShader;
+		for (int i = 0; i < uint(MeshType::COUNT); i++) {
+			delete m_Shaders[i];
+		}
 		delete m_PlatformShader;
 		delete m_DynamicSceneBuffer;
 	}
 
-	void FMegaRenderer::RenderMesh(Mesh* mesh, MeshRenderData data, bool isUI)
+	void FMegaRenderer::RenderMesh(Mesh* mesh, MeshRenderData data, bool isUI, MeshType type, bool isTransparent)
 	{
+		QueueType& q = m_Queue[int(type)][isTransparent];
 		if (!isUI) {
 			data.model = m_ShakeMatrix * data.model;
 		}
 		auto key = std::make_pair(isUI, mesh);
-		auto it = m_Queue.find(key);
-		if (it == m_Queue.end()) {
-			m_Queue[key] = { data };
-			it = m_Queue.find(key);
+		auto it = q.find(key);
+		if (it == q.end()) {
+			q[key] = { data };
+			it = q.find(key);
 		}
 		else {
 			it->second.push_back(data);
 		}
 		int batchSize = it->first.second->GetVBO(1)->GetSize() / sizeof(MeshRenderData);
 		if (it->second.size() == batchSize) {
-			RenderMesh(it, true);
+			RenderMesh(it, true, type);
 		}
 	}
 
 	void FMegaRenderer::RenderAll()
 	{
-		m_SimpleShader->Bind();
-		m_SimpleShader->SetBuffer("UIBuffer", m_UIBuffer);
+		for (int t = 0; t < 2; t++) {
+			for (int i = 0; i < int(MeshType::COUNT); i++) {
+				BindShader(MeshType(i));
 
-		for (auto it = m_Queue.begin(); it != m_Queue.end(); it++) {
-			RenderMesh(it, false);
+				for (auto it = m_Queue[i][t].begin(); it != m_Queue[i][t].end(); it++) {
+					RenderMesh(it, false, MeshType(i));
+				}
+			}
+		}
+		glEnable(GL_DEPTH_TEST);
+	}
+
+	void FMegaRenderer::BindShader(MeshType type) {
+		int i = int(type);
+		m_Shaders[i]->Bind();
+		if (type == MeshType::MESH_2D) {
+			m_Shaders[i]->SetBuffer("UIBuffer", m_UIBuffer);
+		}
+		else if (type == MeshType::MESH_3D) {
+			m_Shaders[i]->SetBuffer("DynamicSceneBuffer", m_DynamicSceneBuffer);
 		}
 	}
 
-	void FMegaRenderer::RenderMesh(QueueType::iterator& it, bool bindShader)
+	void FMegaRenderer::RenderMesh(QueueType::iterator& it, bool bindShader, MeshType type)
 	{
-		glDisable(GL_DEPTH_TEST);
+		if (type == MeshType::MESH_2D)
+			glDisable(GL_DEPTH_TEST);
+		else glEnable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		auto& key = it->first;
 		auto& data = it->second;
 
@@ -80,15 +103,13 @@ namespace fmega {
 		}
 
 		if (bindShader) {
-			m_SimpleShader->Bind();
-			m_SimpleShader->SetBuffer("UIBuffer", m_UIBuffer);
+			BindShader(type);
 		}
 
 		key.second->GetVBO(1)->SetSubdata((byte*)data.data(), data.size() * sizeof(MeshRenderData), 0);
 		key.second->DrawNow(data.size());
 
 		data.clear();
-		glEnable(GL_DEPTH_TEST);
 	}
 
 	void FMegaRenderer::RenderDigit(Mesh* segment, MeshRenderData data, int digit) {
@@ -119,8 +140,8 @@ namespace fmega {
 		float scale = 0.4f;
 		glm::mat4 rot90 = glm::rotate(glm::mat4(1), glm::half_pi<float>(), glm::vec3(0, 0, 1));
 		glm::mat4 originalModel = data.model;
-		glm::vec4 visibleOpacity = data.opacity;
-		glm::vec4 invisibleOpacity = data.opacity * 0.1f;
+		float visibleOpacity = data.opacity;
+		float invisibleOpacity = data.opacity * 0.1f;
 		for (int i = 0; i < 7; i++) {
 			glm::mat4 model = glm::translate(glm::mat4(1), positions[i]);
 			if (rotated[i]) {
