@@ -25,6 +25,11 @@ namespace fmega {
 		UICamera = new Camera();
 		UICamera->viewProjection = glm::ortho(-16.f, 16.f, -9.f, 9.f, -1000.f, 1000.f);
 
+		PlatformAlbedo = new Texture2D("assets/textures/floor_tiles_06_diff_1k_metal.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		PlatformNormalmap = new Texture2D("assets/textures/floor_tiles_06_nor_1k2.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		PlatformRoughness = new Texture2D("assets/textures/floor_tiles_06_metal2.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		PlatformMetalness = new Texture2D("assets/textures/floor_tiles_06_metal2.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+
 		BoxMesh = FMegaObjectFactory::GenBox(1024);
 		SegmentMesh = FMegaObjectFactory::GenSegment(64);
 		SphereMesh = FMegaObjectFactory::GenSphere(1);
@@ -65,7 +70,7 @@ namespace fmega {
 		AddEntity(player);
 
 		glm::vec3 atten = glm::vec3(1.f, 0.1f, 0.001f);
-		float intensity = 10.f;
+		float intensity = 50.f;
 
 		Light* mainLight1 = new Light("Main1", nullptr, this, glm::vec3(1, 1, 1), intensity, atten);
 		mainLight1->GetLocalTransform().position = glm::vec3(5, 5, 2);
@@ -94,6 +99,11 @@ namespace fmega {
 		if (m_PlatformManager != nullptr) {
 			delete m_PlatformManager;
 		}
+
+		delete PlatformAlbedo;
+		delete PlatformNormalmap;
+		delete PlatformRoughness;
+		delete PlatformMetalness;
 
 		delete PickupMesh;
 		delete m_Rewind;

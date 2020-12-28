@@ -239,6 +239,12 @@ namespace fmega {
 		buffer.color = color;
 		m_PlatformShader->SetDynamicObjectBuffer("DynamicObjectBuffer", (byte*)&buffer);
 		m_PlatformShader->SetBuffer("DynamicSceneBuffer", m_DynamicSceneBuffer);
+
+		m_PlatformShader->SetTexture("uAlbedoMap", m_Scene->PlatformAlbedo);
+		m_PlatformShader->SetTexture("uNormalMap", m_Scene->PlatformNormalmap);
+		m_PlatformShader->SetTexture("uRoughnessMap", m_Scene->PlatformRoughness);
+		m_PlatformShader->SetTexture("uMetalnessMap", m_Scene->PlatformMetalness);
+
 		mesh->DrawNow();
 		glDisable(GL_BLEND);
 	}

@@ -26,18 +26,17 @@ namespace fmega {
 		ColorVertex(
 			const glm::vec3& position, 
 			const glm::vec4& color, 
-			const glm::vec3& normal = glm::vec3(0, 1, 0),
-			const glm::vec2& uv = glm::vec2(0, 0)) : 
+			const glm::vec3& normal = glm::vec3(0, 1, 0)) : 
 
 			position(glm::vec4(position, 1.f)), 
 			color(color), 
-			normal(glm::vec4(normal, 0)), 
-			uv(glm::vec4(uv, 0, 0)) {}
+			normal(glm::vec4(normal, 0)) {}
 
 		glm::vec4 position = glm::vec4(0);
 		glm::vec4 uv = glm::vec4(0);
 		glm::vec4 color = glm::vec4(0);
 		glm::vec4 normal = glm::vec4(0, 1, 0, 0);
+		glm::vec4 tangent = glm::vec4(0);
 	};
 
 	struct PlatformVertex {
@@ -45,6 +44,7 @@ namespace fmega {
 		glm::vec4 uv = glm::vec4(0);
 		glm::vec4 color = glm::vec4(0);
 		glm::vec4 normal = glm::vec4(0, 1, 0, 0);
+		glm::vec4 tangent = glm::vec4(0);
 		glm::quat initialRotation = glm::quat();
 		glm::vec4 initialPosition = glm::vec4(0);
 		glm::vec4 localOrigin = glm::vec4(0);
@@ -157,6 +157,16 @@ namespace fmega {
 			std::vector<uint32>& indices,
 			int v0, int v1, int v2,
 			bool isOutward);
+		static void GenTangents(
+			ColorVertex* vertices,
+			uint32 numVertices,
+			uint32* indices,
+			uint32 numIndices);
+		static void GenTangents(
+			PlatformVertex* vertices,
+			uint32 numVertices,
+			uint32* indices,
+			uint32 numIndices);
 		static void GenLine(
 			std::vector<ColorVertex>& vertices,
 			std::vector<uint32>& indices,

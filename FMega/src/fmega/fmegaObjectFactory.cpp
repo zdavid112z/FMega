@@ -52,6 +52,7 @@ namespace fmega {
 
 		GenSmoothCubeVertexPositions(quality, posToId, smoothAmount, color, vertices, size);
 		GenSmoothCubeFacesAndNormals(quality, posToId, vertices, indices);
+		GenTangents(vertices.data(), vertices.size(), indices.data(), indices.size());
 	}
 
 	void FMegaObjectFactory::GenSmoothCubeFacesAndNormals(int quality, std::map<std::tuple<int, int, int>, int>& posToId, std::vector<fmega::ColorVertex>& vertices, std::vector<uint32>& indices)
@@ -382,6 +383,8 @@ namespace fmega {
 				}
 			}
 		}
+
+		GenTangents(vertices, numVertices, indices, numIndices);
 	}
 
 	Mesh* FMegaObjectFactory::GenSphere(uint32 numInstances) {
@@ -389,7 +392,7 @@ namespace fmega {
 		std::vector<uint32> indices;
 
 		GenSphere(vertices, indices, glm::vec4(1, 1, 1, 1), glm::vec3(0), 1.f, 25);
-
+		GenTangents(vertices.data(), vertices.size(), indices.data(), indices.size());
 		return GenObject(vertices, indices, PrimitiveType::TRIANGLES, numInstances);
 	}
 
@@ -451,10 +454,6 @@ namespace fmega {
 		localOrigin /= 4.f;
 
 		for (int i = 0; i < 4; i++) {
-			positions[i] -= glm::vec4(localOrigin, 0.f);
-		}
-
-		for (int i = 0; i < 4; i++) {
 			int indStart = numVertices;
 			PlatformVertex p[3];
 			glm::vec3 faceCenter = glm::vec3(0.f);
@@ -463,7 +462,7 @@ namespace fmega {
 				faceCenter += glm::vec3(p[j].position);
 			}
 			faceCenter /= 3.f;
-			glm::vec3 objToFace = faceCenter;
+			glm::vec3 objToFace = faceCenter - localOrigin;
 			glm::vec3 normal = GetNormal(p[0].position, p[1].position, p[2].position);
 			float d = glm::dot(normal, objToFace);
 			if (d < 0) {
@@ -472,8 +471,8 @@ namespace fmega {
 			}
 
 			for (int j = 0; j < 3; j++) {
-				//p[j].position -= glm::vec4(localOrigin, 0.f);
-				p[j].uv = glm::vec4(j >= 1, j >= 2, 0, 0);
+				p[j].uv = glm::vec4(p[j].position.x, p[j].position.z + p[j].position.y, 0.f, 0.f) * 0.15f;
+				p[j].position -= glm::vec4(localOrigin, 0.f);
 				p[j].localOrigin = glm::vec4(localOrigin, 1.f);
 				p[j].color = color;
 				p[j].normal = glm::vec4(normal, 0);
@@ -687,6 +686,86 @@ namespace fmega {
 		}
 	}
 
+	void FMegaObjectFactory::GenTangents(
+		ColorVertex* vertices,
+		uint32 numVertices,
+		uint32* indices,
+		uint32 numIndices) {
+
+		for (uint32 i = 0; i < numIndices; i += 3) {
+			glm::vec4 v0 = vertices[indices[i + 0]].position;
+			glm::vec4 v1 = vertices[indices[i + 1]].position;
+			glm::vec4 v2 = vertices[indices[i + 2]].position;
+
+			// Shortcuts for UVs
+			glm::vec4 uv0 = vertices[indices[i + 0]].uv;
+			glm::vec4 uv1 = vertices[indices[i + 1]].uv;
+			glm::vec4 uv2 = vertices[indices[i + 2]].uv;
+
+			// Edges of the triangle : position delta
+			glm::vec3 deltaPos1 = v1 - v0;
+			glm::vec3 deltaPos2 = v2 - v0;
+
+			// UV delta
+			glm::vec2 deltaUV1 = uv1 - uv0;
+			glm::vec2 deltaUV2 = uv2 - uv0;
+
+			float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+			glm::vec4 tangent = glm::vec4((deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r, 0.f);
+			tangent = glm::normalize(tangent);
+
+			vertices[indices[i + 0]].tangent += tangent;
+			vertices[indices[i + 1]].tangent += tangent;
+			vertices[indices[i + 2]].tangent += tangent;
+		}
+
+		for (uint32 i = 0; i < numVertices; i++) {
+			auto& v = vertices[i];
+			v.tangent = glm::normalize(v.tangent);
+			v.tangent = glm::normalize(v.tangent - glm::dot(v.tangent, v.normal) * v.normal);
+		}
+	}
+
+	void FMegaObjectFactory::GenTangents(
+		PlatformVertex* vertices,
+		uint32 numVertices,
+		uint32* indices,
+		uint32 numIndices) {
+
+		for (uint32 i = 0; i < numIndices; i += 3) {
+			glm::vec4 v0 = vertices[indices[i + 0]].position;
+			glm::vec4 v1 = vertices[indices[i + 1]].position;
+			glm::vec4 v2 = vertices[indices[i + 2]].position;
+
+			// Shortcuts for UVs
+			glm::vec4 uv0 = vertices[indices[i + 0]].uv;
+			glm::vec4 uv1 = vertices[indices[i + 1]].uv;
+			glm::vec4 uv2 = vertices[indices[i + 2]].uv;
+
+			// Edges of the triangle : position delta
+			glm::vec3 deltaPos1 = v1 - v0;
+			glm::vec3 deltaPos2 = v2 - v0;
+
+			// UV delta
+			glm::vec2 deltaUV1 = uv1 - uv0;
+			glm::vec2 deltaUV2 = uv2 - uv0;
+
+			float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+			glm::vec4 tangent = glm::vec4((deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r, 0.f);
+			tangent = glm::normalize(tangent);
+
+			vertices[indices[i + 0]].tangent += tangent;
+			vertices[indices[i + 1]].tangent += tangent;
+			vertices[indices[i + 2]].tangent += tangent;
+		}
+
+		for (uint32 i = 0; i < numVertices; i++) {
+			auto& v = vertices[i];
+			v.tangent = glm::normalize(v.tangent);
+			v.tangent = glm::normalize(v.tangent - glm::dot(v.tangent, v.normal) * v.normal);
+		}
+	}
+
 	Mesh* FMegaObjectFactory::GenObject(const std::vector<ColorVertex>& vertices, const std::vector<uint32>& indices, PrimitiveType primitiveType, uint32 numInstances)
 	{
 		GPUBuffer* ibo = new GPUBuffer(BufferType::ELEMENT_ARRAY, (byte*)indices.data(), indices.size() * sizeof(uint32), BufferUsage::STATIC_DRAW);
@@ -696,6 +775,7 @@ namespace fmega {
 		m->SetIBO(ibo, indices.size());
 
 		m->AddBuffer(vbo);
+		m->PushToBufferFormat(MeshVariableType::FLOAT32, 4);
 		m->PushToBufferFormat(MeshVariableType::FLOAT32, 4);
 		m->PushToBufferFormat(MeshVariableType::FLOAT32, 4);
 		m->PushToBufferFormat(MeshVariableType::FLOAT32, 4);
@@ -735,6 +815,7 @@ namespace fmega {
 		m->SetIBO(ibo, numIndices);
 
 		m->AddBuffer(vbo);
+		m->PushToBufferFormat(MeshVariableType::FLOAT32, 4);
 		m->PushToBufferFormat(MeshVariableType::FLOAT32, 4);
 		m->PushToBufferFormat(MeshVariableType::FLOAT32, 4);
 		m->PushToBufferFormat(MeshVariableType::FLOAT32, 4);

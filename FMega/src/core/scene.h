@@ -27,6 +27,7 @@ namespace fmega {
 	protected:
 		Game* m_Game;
 		std::vector<Entity*> m_Entities;
+		std::vector<Entity*> m_EntitiesToAdd;
 		Camera* m_Camera = nullptr;
 	};
 

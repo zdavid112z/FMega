@@ -9,6 +9,7 @@
 #include "entities/skybox.h"
 #include "platformManager.h"
 #include "rewindManager.h"
+#include "graphics/texture2d.h"
 
 namespace fmega {
 
@@ -27,6 +28,11 @@ namespace fmega {
 		FMegaRenderer* GetRenderer() { return m_Renderer; }
 		PlatformManager* GetPlatformManager() { return m_PlatformManager; }
 		RewindManager* GetRewind() { return m_Rewind; }
+
+		Texture2D* PlatformAlbedo;
+		Texture2D* PlatformNormalmap;
+		Texture2D* PlatformRoughness;
+		Texture2D* PlatformMetalness;
 
 		Mesh* BoxMesh;
 		Mesh* SegmentMesh;

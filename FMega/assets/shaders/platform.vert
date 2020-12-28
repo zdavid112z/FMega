@@ -7,9 +7,10 @@ layout (location = 0) in vec4 aPosition;
 layout (location = 1) in vec4 aUV;
 layout (location = 2) in vec4 aColor;
 layout (location = 3) in vec4 aNormal;
-layout (location = 4) in vec4 aInitialRotation;
-layout (location = 5) in vec4 aInitialPosition;
-layout (location = 6) in vec4 aLocalOrigin;
+layout (location = 4) in vec4 aTangent;
+layout (location = 5) in vec4 aInitialRotation;
+layout (location = 6) in vec4 aInitialPosition;
+layout (location = 7) in vec4 aLocalOrigin;
 
 layout(std140) uniform DynamicSceneBuffer
 {
@@ -36,7 +37,7 @@ out VertexData
     vec3 vPosition;
 	vec2 vUV;
 	float vTexOpacity;
-	vec3 vNormal;
+	mat3 vTBN;
 	vec4 vColor;
 } vData;
 
@@ -109,12 +110,15 @@ void main()
     gl_Position = uViewProjection * globalRotatedPosition;
 
     vec3 localNormal = normalize(rotate(currentQuat, aNormal.xyz));
+    vec3 localTangent = normalize(rotate(currentQuat, aTangent.xyz));
     //vec3 localNormal = aNormal.xyz;
-    vec3 globalNormal = (uModel * vec4(localNormal, 0.0)).xyz;
+    vec3 globalNormal = normalize(uModel * vec4(localNormal, 0.0)).xyz;
+    vec3 globalTangent = normalize(uModel * vec4(localTangent, 0.0)).xyz;
+    vec3 globalBitangent = cross(globalNormal, globalTangent);
 
     vData.vPosition = globalRotatedPosition.xyz;
 	vData.vUV = aUV.xy;
-	vData.vNormal = globalNormal.xyz;
+	vData.vTBN = mat3(globalTangent, globalBitangent, globalNormal);
 	vData.vColor = uColor + aColor;
-	vData.vTexOpacity = 0.0;
+	vData.vTexOpacity = 0.8;
 }

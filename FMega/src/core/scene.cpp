@@ -19,6 +19,11 @@ namespace fmega {
 	}
 
 	void Scene::Update(float delta) {
+		for (auto e : m_EntitiesToAdd) {
+			m_Entities.push_back(e);
+		}
+		m_EntitiesToAdd.clear();
+
 		for (size_t i = 0; i < m_Entities.size(); i++) {
 			m_Entities[i]->Update(delta);
 		}
@@ -63,8 +68,7 @@ namespace fmega {
 
 	void Scene::AddEntity(Entity* e)
 	{
-		m_Entities.push_back(e);
-		e->ForceUpdateGlobalModel();
+		m_EntitiesToAdd.push_back(e);
 	}
 
 	void Scene::RemoveEntity(const std::string& name)
@@ -72,6 +76,11 @@ namespace fmega {
 		auto it = std::find_if(m_Entities.begin(), m_Entities.end(), [&](Entity* e) { return e->GetName() == name; });
 		if (it != m_Entities.end()) {
 			m_Entities.erase(it);
+		}
+
+		it = std::find_if(m_EntitiesToAdd.begin(), m_EntitiesToAdd.end(), [&](Entity* e) { return e->GetName() == name; });
+		if (it != m_EntitiesToAdd.end()) {
+			m_EntitiesToAdd.erase(it);
 		}
 	}
 

@@ -3,8 +3,24 @@
 
 namespace fmega {
 
+	GLTexture2D::GLTexture2D(const std::string& path, TextureFilter filter, TextureWrap wrap, bool generateMipmaps) {
+		Image im = ImageIO::LoadImage(path);
+		Init(im, filter, wrap, generateMipmaps);
+		ImageIO::FreeImage(im);
+	}
+
+	GLTexture2D::GLTexture2D(const std::string& path, int32 numComponents, TextureFilter filter, TextureWrap wrap, bool generateMipmaps) {
+		Image im = ImageIO::LoadImage(path, numComponents);
+		Init(im, filter, wrap, generateMipmaps);
+		ImageIO::FreeImage(im);
+	}
+
 	GLTexture2D::GLTexture2D(const Image& image, TextureFilter filter, TextureWrap wrap, bool generateMipmaps)
 	{
+		Init(image, filter, wrap, generateMipmaps);
+	}
+
+	void GLTexture2D::Init(const Image& image, TextureFilter filter, TextureWrap wrap, bool generateMipmaps) {
 		glGenTextures(1, &m_Texture);
 		GLuint glminfilter, glmagfilter, glwrap;
 		if (generateMipmaps)
