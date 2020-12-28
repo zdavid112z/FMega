@@ -3,7 +3,7 @@
 
 namespace fmega {
 
-	hsv Colors::ToHSV(const glm::vec3& in) {
+    hsv Colors::ToHSV(const glm::vec3& in) {
         hsv         out;
         float       min, max, delta;
 
@@ -47,9 +47,9 @@ namespace fmega {
         out.h = glm::radians(out.h);
 
         return out;
-	}
+    }
 
-	glm::vec3 Colors::ToRGB(const hsv& in) {
+    glm::vec3 Colors::ToRGB(const hsv& in) {
         float      hh, p, q, t, ff;
         long        i;
         glm::vec3   out;
@@ -104,7 +104,7 @@ namespace fmega {
             break;
         }
         return out;
-	}
+    }
 
     hsv Colors::ToHSV(const glm::vec4& rgb) {
         hsv out = Colors::ToHSV(glm::vec3(rgb));
@@ -114,6 +114,22 @@ namespace fmega {
 
     glm::vec4 Colors::ToRGBA(const hsv& hsv) {
         return glm::vec4(ToRGB(hsv), hsv.a);
+    }
+
+    glm::vec3 Colors::ToSRGB(const glm::vec3& rgb) {
+        return glm::pow(rgb, glm::vec3(2.2f));
+    }
+
+    glm::vec4 Colors::ToSRGB(const glm::vec4& rgb) {
+        return glm::vec4(ToSRGB(glm::vec3(rgb)), rgb.a);
+    }
+
+    glm::vec3 Colors::ToRGB(const glm::vec3& srgb) {
+        return glm::pow(srgb, glm::vec3(1.0f / 2.2f));
+    }
+
+    glm::vec4 Colors::ToRGB(const glm::vec4& srgb) {
+        return glm::vec4(ToRGB(glm::vec3(srgb)), srgb.a);
     }
 
 }

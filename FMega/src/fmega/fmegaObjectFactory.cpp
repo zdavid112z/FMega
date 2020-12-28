@@ -412,7 +412,7 @@ namespace fmega {
 			{ 3, 4, 5, 7 },
 			{ 0, 2, 3, 6 },
 			{ 0, 3, 4, 6 },
-			{ 3, 4, 5, 7 }
+			{ 3, 4, 6, 7 }
 		};
 		std::vector<int> inds(allInds[typeId], allInds[typeId] + 4);
 		if (flip) {
@@ -451,6 +451,10 @@ namespace fmega {
 		localOrigin /= 4.f;
 
 		for (int i = 0; i < 4; i++) {
+			positions[i] -= glm::vec4(localOrigin, 0.f);
+		}
+
+		for (int i = 0; i < 4; i++) {
 			int indStart = numVertices;
 			PlatformVertex p[3];
 			glm::vec3 faceCenter = glm::vec3(0.f);
@@ -459,16 +463,17 @@ namespace fmega {
 				faceCenter += glm::vec3(p[j].position);
 			}
 			faceCenter /= 3.f;
-			glm::vec3 objToFace = glm::normalize(faceCenter - localOrigin);
+			glm::vec3 objToFace = faceCenter;
 			glm::vec3 normal = GetNormal(p[0].position, p[1].position, p[2].position);
 			float d = glm::dot(normal, objToFace);
 			if (d < 0) {
 				normal = -normal;
-				std::swap(p[0], p[1]);
+				std::swap(p[0].position, p[1].position);
 			}
 
 			for (int j = 0; j < 3; j++) {
-				p[j].position -= glm::vec4(localOrigin, 0.f);
+				//p[j].position -= glm::vec4(localOrigin, 0.f);
+				p[j].uv = glm::vec4(j >= 1, j >= 2, 0, 0);
 				p[j].localOrigin = glm::vec4(localOrigin, 1.f);
 				p[j].color = color;
 				p[j].normal = glm::vec4(normal, 0);
@@ -730,6 +735,7 @@ namespace fmega {
 		m->SetIBO(ibo, numIndices);
 
 		m->AddBuffer(vbo);
+		m->PushToBufferFormat(MeshVariableType::FLOAT32, 4);
 		m->PushToBufferFormat(MeshVariableType::FLOAT32, 4);
 		m->PushToBufferFormat(MeshVariableType::FLOAT32, 4);
 		m->PushToBufferFormat(MeshVariableType::FLOAT32, 4);

@@ -219,6 +219,9 @@
     <ClInclude Include="src\fmega\entities\pickup.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\fmega\entities\light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -350,6 +353,9 @@
     <ClCompile Include="src\fmega\entities\pickup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\fmega\entities\light.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\platform.vert" />
@@ -362,5 +368,7 @@
     <None Include="assets\shaders\skybox.frag" />
     <None Include="assets\shaders\simple3d.vert" />
     <None Include="assets\shaders\simple3d.frag" />
+    <None Include="assets\shaders\light.glsl" />
+    <None Include="assets\shaders\common.glsl" />
   </ItemGroup>
 </Project>

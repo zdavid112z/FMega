@@ -1,11 +1,15 @@
 #version 430 core
 
+#include "common.glsl"
+#include "light.glsl"
+
 layout (location = 0) in vec4 aPosition;
-layout (location = 1) in vec4 aColor;
-layout (location = 2) in vec4 aNormal;
-layout (location = 3) in vec4 aInitialRotation;
-layout (location = 4) in vec4 aInitialPosition;
-layout (location = 5) in vec4 aLocalOrigin;
+layout (location = 1) in vec4 aUV;
+layout (location = 2) in vec4 aColor;
+layout (location = 3) in vec4 aNormal;
+layout (location = 4) in vec4 aInitialRotation;
+layout (location = 5) in vec4 aInitialPosition;
+layout (location = 6) in vec4 aLocalOrigin;
 
 layout(std140) uniform DynamicSceneBuffer
 {
@@ -14,6 +18,11 @@ layout(std140) uniform DynamicSceneBuffer
 	vec3 uEyePosition;
 	float uTargetZ;
 	float uCameraOffset;
+	float uUnused1;
+	float uUnused2;
+	float uUnused3;
+	PointLight uPointLights[NUM_POINT_LIGHTS];
+	SpotLight uSpotLights[NUM_SPOT_LIGHTS];
 };
 
 layout(std140) uniform DynamicObjectBuffer
@@ -24,9 +33,11 @@ layout(std140) uniform DynamicObjectBuffer
 
 out VertexData
 {
-    vec3 vNormal;
+    vec3 vPosition;
+	vec2 vUV;
+	float vTexOpacity;
+	vec3 vNormal;
 	vec4 vColor;
-    float vZ;
 } vData;
 
 vec4 slerp(vec4 v0, vec4 v1, float t) {
@@ -98,8 +109,12 @@ void main()
     gl_Position = uViewProjection * globalRotatedPosition;
 
     vec3 localNormal = normalize(rotate(currentQuat, aNormal.xyz));
+    //vec3 localNormal = aNormal.xyz;
     vec3 globalNormal = (uModel * vec4(localNormal, 0.0)).xyz;
-    vData.vNormal = globalNormal;
-    vData.vColor = uColor + aColor;
-    vData.vZ = globalRotatedPosition.z;
+
+    vData.vPosition = globalRotatedPosition.xyz;
+	vData.vUV = aUV.xy;
+	vData.vNormal = globalNormal.xyz;
+	vData.vColor = uColor + aColor;
+	vData.vTexOpacity = 0.0;
 }

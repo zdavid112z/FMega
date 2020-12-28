@@ -42,6 +42,7 @@ namespace fmega {
 
 	struct PlatformVertex {
 		glm::vec4 position = glm::vec4(0);
+		glm::vec4 uv = glm::vec4(0);
 		glm::vec4 color = glm::vec4(0);
 		glm::vec4 normal = glm::vec4(0, 1, 0, 0);
 		glm::quat initialRotation = glm::quat();

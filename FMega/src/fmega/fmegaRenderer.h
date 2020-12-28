@@ -5,17 +5,42 @@
 #include "graphics/gpuBuffer.h"
 #include "fmegaObjectFactory.h"
 
+#define NUM_POINT_LIGHTS 4
+#define NUM_SPOT_LIGHTS  4
+
 namespace fmega {
 
 	class FMegaScene;
 
 	#pragma pack(push,1)
+	struct PointLight {
+		glm::vec4 position;
+		glm::vec4 color;
+		glm::vec4 atten;
+	};
+
+	struct SpotLight {
+		glm::vec4 position;
+		glm::vec4 color;
+		glm::vec4 atten;
+		glm::vec4 direction;
+		float innerCutoff;
+		float outerCutoff;
+		float unused1;
+		float unused2;
+	};
+
 	struct SceneBuffer {
 		glm::mat4 viewProjection;
 		glm::mat4 invViewProjection;
 		glm::vec3 eyePosition;
 		float targetZ;
 		float cameraOffset;
+		float unused1;
+		float unused2;
+		float unused3;
+		PointLight pointLights[NUM_POINT_LIGHTS];
+		SpotLight spotLights[NUM_SPOT_LIGHTS];
 	};
 
 	struct DynamicPlayerBuffer {

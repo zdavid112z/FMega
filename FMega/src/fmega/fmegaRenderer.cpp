@@ -2,6 +2,7 @@
 #include "fmegaRenderer.h"
 #include "fmegaScene.h"
 #include "utils/random.h"
+#include "entities/light.h"
 
 namespace fmega {
 
@@ -10,7 +11,7 @@ namespace fmega {
 	{
 		m_Shaders[uint(MeshType::MESH_2D)] = new Shader("assets/shaders/simple.vert", "assets/shaders/simple.frag", sizeof(glm::mat4));
 		m_Shaders[uint(MeshType::MESH_3D)] = new Shader("assets/shaders/simple3d.vert", "assets/shaders/simple3d.frag", sizeof(glm::mat4));
-		m_PlatformShader = new Shader("assets/shaders/platform.vert", "assets/shaders/platform.frag", sizeof(DynamicPlatformBuffer));
+		m_PlatformShader = new Shader("assets/shaders/platform.vert", "assets/shaders/simple3d.frag", sizeof(DynamicPlatformBuffer));
 		m_PlayerShader = new Shader("assets/shaders/player.vert", "assets/shaders/player.frag", sizeof(DynamicPlayerBuffer));
 		m_SkyboxShader = new Shader("assets/shaders/skybox.vert", "assets/shaders/skybox.frag", 0);
 		m_DynamicSceneBuffer = new GPUBuffer(BufferType::UNIFORM, nullptr, sizeof(SceneBuffer), BufferUsage::DYNAMIC_DRAW);
@@ -180,10 +181,56 @@ namespace fmega {
 		bufferData.invViewProjection = glm::inverse(projection * view);
 		bufferData.eyePosition = m_Scene->GetCamera()->position;
 		bufferData.cameraOffset = skyboxOffset;
+		
+		std::vector<PointLight> pointLights;
+		std::vector<SpotLight> spotLights;
+		m_Scene->ForeachEntity([this, &pointLights, &spotLights](Entity* e) {
+			if (StringUtils::StartsWith(e->GetName(), "Light")) {
+				Light* l = (Light*)e;
+				switch (l->GetLightType()) {
+				case LightType::POINT:
+					pointLights.push_back(l->GetPointLightData());
+					break;
+				case LightType::SPOT:
+					spotLights.push_back(l->GetSpotLightData());
+					break;
+				}
+			}
+		});
+
+		std::sort(pointLights.begin(), pointLights.end(), [](const PointLight& a, const PointLight& b) {
+			return glm::length2(a.position) < glm::length2(b.position);
+		});
+		std::sort(spotLights.begin(), spotLights.end(), [](const SpotLight& a, const SpotLight& b) {
+			return glm::length2(a.position) < glm::length2(b.position);
+		});
+
+		for (int i = 0; i < NUM_POINT_LIGHTS; i++) {
+			if (i >= pointLights.size()) {
+				bufferData.pointLights[i].color = glm::vec4(0);
+			}
+			else {
+				bufferData.pointLights[i] = pointLights[i];
+			}
+		}
+
+		for (int i = 0; i < NUM_SPOT_LIGHTS; i++) {
+			if (i >= spotLights.size()) {
+				bufferData.spotLights[i].color = glm::vec4(0);
+			}
+			else {
+				bufferData.spotLights[i] = spotLights[i];
+			}
+		}
+
 		m_DynamicSceneBuffer->SetSubdata((byte*)&bufferData, sizeof(bufferData), 0);
 	}
 
 	void FMegaRenderer::RenderPlatform(Mesh* mesh, const glm::mat4& model, const glm::vec4& color) {
+		glm::vec3 pos = glm::vec3(model * glm::vec4(0, 0, 0, 1));
+		if (pos.z < -85.f) {
+			return;
+		}
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		m_PlatformShader->Bind();

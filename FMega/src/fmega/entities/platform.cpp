@@ -10,7 +10,7 @@ namespace fmega {
 
 	const float Platform::StartingZ = -30.f;
 	const float Platform::QualityPerUnit = 1.5f;
-	const float Platform::PlatformRandomness = 0.8f;
+	const float Platform::PlatformRandomness = 0.f;//0.8f;
 	const float Platform::PlatformThickness = 0.5f;
 	const float Platform::PlatformColorRandomness = 0.1f;
 	const glm::vec2 Platform::PlatformXYRandomness = glm::vec2(8.f, 4.f);

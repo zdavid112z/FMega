@@ -8,6 +8,7 @@
 #include "entities/levelManager.h"
 #include "core/game.h"
 #include "gameOverEvent.h"
+#include "entities/light.h"
 
 namespace fmega {
 
@@ -60,14 +61,42 @@ namespace fmega {
 		m_Skybox = new Skybox("Skybox", nullptr, this);
 		AddEntity(m_Skybox);
 		AddEntity(new LevelManager("Manager", nullptr, this));
-		AddEntity(new Player("Player", nullptr, this, m_PlayerRadius));
+		Player* player = new Player("Player", nullptr, this, m_PlayerRadius);
+		AddEntity(player);
+
+		glm::vec3 atten = glm::vec3(1.f, 0.1f, 0.001f);
+		float intensity = 10.f;
+
+		Light* mainLight1 = new Light("Main1", nullptr, this, glm::vec3(1, 1, 1), intensity, atten);
+		mainLight1->GetLocalTransform().position = glm::vec3(5, 5, 2);
+		AddEntity(mainLight1);
+
+		Light* mainLight2 = new Light("Main2", nullptr, this, glm::vec3(1, 1, 1), intensity, atten);
+		mainLight2->GetLocalTransform().position = glm::vec3(-5, 5, 2);
+		AddEntity(mainLight2);
+
+		Light* mainLight3 = new Light("Main3", nullptr, this, glm::vec3(1, 1, 1), intensity, atten);
+		mainLight3->GetLocalTransform().position = glm::vec3(5, -5, 2);
+		AddEntity(mainLight3);
+
+		Light* mainLight4 = new Light("Main4", nullptr, this, glm::vec3(1, 1, 1), intensity, atten);
+		mainLight4->GetLocalTransform().position = glm::vec3(-5, -5, 2);
+		AddEntity(mainLight4);
 	}
 
 	FMegaScene::~FMegaScene()
 	{
+		for (auto e : m_Entities) {
+			delete e;
+		}
+		m_Entities.clear();
+
+		if (m_PlatformManager != nullptr) {
+			delete m_PlatformManager;
+		}
+
 		delete PickupMesh;
 		delete m_Rewind;
-		delete m_PlatformManager;
 		delete m_RestartManager;
 		delete SphereMesh;
 		delete BoxMesh;

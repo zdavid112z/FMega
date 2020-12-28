@@ -120,6 +120,7 @@
     <ClInclude Include="src\fmega\cameras\fpCamera.h" />
     <ClInclude Include="src\fmega\cameras\gameCamera.h" />
     <ClInclude Include="src\fmega\entities\levelManager.h" />
+    <ClInclude Include="src\fmega\entities\light.h" />
     <ClInclude Include="src\fmega\entities\pickup.h" />
     <ClInclude Include="src\fmega\entities\platform.h" />
     <ClInclude Include="src\fmega\entities\player.h" />
@@ -188,6 +189,7 @@
     <ClCompile Include="src\fmega\cameras\fpCamera.cpp" />
     <ClCompile Include="src\fmega\cameras\gameCamera.cpp" />
     <ClCompile Include="src\fmega\entities\levelManager.cpp" />
+    <ClCompile Include="src\fmega\entities\light.cpp" />
     <ClCompile Include="src\fmega\entities\pickup.cpp" />
     <ClCompile Include="src\fmega\entities\platform.cpp" />
     <ClCompile Include="src\fmega\entities\player.cpp" />
@@ -225,6 +227,8 @@
     <ClCompile Include="src\utils\random.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\shaders\common.glsl" />
+    <None Include="assets\shaders\light.glsl" />
     <None Include="assets\shaders\platform.frag" />
     <None Include="assets\shaders\platform.vert" />
     <None Include="assets\shaders\player.frag" />

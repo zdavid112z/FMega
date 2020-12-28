@@ -19,6 +19,11 @@ namespace fmega {
 		static glm::vec3 ToRGB(const hsv& hsv);
 		static hsv ToHSV(const glm::vec4& rgb);
 		static glm::vec4 ToRGBA(const hsv& hsv);
+
+		static glm::vec3 ToSRGB(const glm::vec3& rgb);
+		static glm::vec4 ToSRGB(const glm::vec4& rgb);
+		static glm::vec3 ToRGB(const glm::vec3& srgb);
+		static glm::vec4 ToRGB(const glm::vec4& srgb);
 	};
 
 };

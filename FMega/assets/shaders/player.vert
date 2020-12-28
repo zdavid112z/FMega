@@ -1,5 +1,8 @@
 #version 430 core
 
+#include "common.glsl"
+#include "light.glsl"
+
 layout (location = 0) in vec4 aPosition;
 layout (location = 1) in vec4 aUV;
 layout (location = 2) in vec4 aColor;
@@ -12,6 +15,11 @@ layout(std140) uniform DynamicSceneBuffer
 	vec3 uEyePosition;
 	float uTargetZ;
 	float uCameraOffset;
+	float uUnused1;
+	float uUnused2;
+	float uUnused3;
+	PointLight uPointLights[NUM_POINT_LIGHTS];
+	SpotLight uSpotLights[NUM_SPOT_LIGHTS];
 };
 
 layout(std140) uniform DynamicObjectBuffer

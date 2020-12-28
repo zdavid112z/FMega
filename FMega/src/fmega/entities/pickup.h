@@ -1,10 +1,6 @@
 #pragma once
 
-#include <thread>
-#include <atomic>
 #include "fmegaEntity.h"
-#include "utils/colors.h"
-#include "graphics/gpuBuffer.h"
 
 namespace fmega {
 
