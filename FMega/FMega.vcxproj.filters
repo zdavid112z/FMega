@@ -222,6 +222,9 @@
     <ClInclude Include="src\fmega\entities\light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\fmega\entities\tunnel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -354,6 +357,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\fmega\entities\light.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fmega\entities\tunnel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

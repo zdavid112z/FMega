@@ -125,6 +125,7 @@
     <ClInclude Include="src\fmega\entities\platform.h" />
     <ClInclude Include="src\fmega\entities\player.h" />
     <ClInclude Include="src\fmega\cameras\tpCamera.h" />
+    <ClInclude Include="src\fmega\entities\tunnel.h" />
     <ClInclude Include="src\fmega\entities\wall.h" />
     <ClInclude Include="src\fmega\gameOverEvent.h" />
     <ClInclude Include="src\fmega\platformManager.h" />
@@ -194,6 +195,7 @@
     <ClCompile Include="src\fmega\entities\platform.cpp" />
     <ClCompile Include="src\fmega\entities\player.cpp" />
     <ClCompile Include="src\fmega\cameras\tpCamera.cpp" />
+    <ClCompile Include="src\fmega\entities\tunnel.cpp" />
     <ClCompile Include="src\fmega\entities\wall.cpp" />
     <ClCompile Include="src\fmega\platformManager.cpp" />
     <ClCompile Include="src\fmega\restartManager.cpp" />

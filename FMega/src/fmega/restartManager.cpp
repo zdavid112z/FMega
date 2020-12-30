@@ -40,7 +40,7 @@ namespace fmega {
 					data.model = model;
 					data.color = r.color;
 					data.opacity = 1.f;
-					data.textureOpacity = 0.f;
+					data.albedoStrength = 0.f;
 					m_Scene->GetRenderer()->RenderMesh(m_Scene->BoxMesh, data, true);
 				}
 			}

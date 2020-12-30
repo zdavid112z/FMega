@@ -28,11 +28,19 @@ namespace fmega {
 	void Pickup::Render(float delta) {
 		{
 			MeshRenderData d;
-			d.textureOpacity = 0;
+			d.albedoStrength = 0;
 			d.opacity = 0.5f;
 			d.color = glm::vec4(1, 0, 0, 1);
 			d.model = m_GlobalTransform;
-			m_FMegaScene->GetRenderer()->RenderMesh(m_FMegaScene->PickupMesh, d, false, MeshType::MESH_3D, true);
+			d.roughness = 0.15f;
+			d.roughnessmapStrength = 0.f;
+			d.metalness = 0.01f;
+			QueueKey q;
+			q.mesh = m_FMegaScene->PickupMesh;
+			q.ui = false;
+			q.transparent = true;
+			q.type = MeshType::MESH_3D;
+			m_FMegaScene->GetRenderer()->RenderMesh(q, d);
 		}
 	}
 

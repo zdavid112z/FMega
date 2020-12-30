@@ -39,6 +39,12 @@ out VertexData
 	float vTexOpacity;
 	mat3 vTBN;
 	vec4 vColor;
+	float vRoughness;
+	float vRoughnessMapStrength;
+	float vMetalness;
+	float vMetalMapStrength;
+	vec3 vInstNormal;
+	float vNormalMapStrength;
 } vData;
 
 vec4 slerp(vec4 v0, vec4 v1, float t) {
@@ -121,4 +127,11 @@ void main()
 	vData.vTBN = mat3(globalTangent, globalBitangent, globalNormal);
 	vData.vColor = uColor + aColor;
 	vData.vTexOpacity = 0.8;
+
+    vData.vRoughness = 0.0;
+	vData.vRoughnessMapStrength = 1.0;
+	vData.vMetalness = 0.0;
+	vData.vMetalMapStrength = 1.0;
+	vData.vInstNormal = vec3(0, 0, 1);
+	vData.vNormalMapStrength = 1.0;
 }

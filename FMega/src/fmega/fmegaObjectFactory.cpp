@@ -4,6 +4,8 @@
 #include "graphics/gpuBuffer.h"
 #include "utils/random.h"
 
+#include "entities/tunnel.h"
+
 namespace fmega {
 
 	Mesh* FMegaObjectFactory::GenBox(uint32 numInstances)
@@ -28,7 +30,60 @@ namespace fmega {
 		std::vector<ColorVertex> vertices;
 		std::vector<uint32> indices;
 
-		GenSmoothCube(vertices, indices, glm::vec4(1, 1, 1, 1), glm::vec3(0), 1.f, 12, 1.f);
+		GenSmoothCube(vertices, indices, glm::vec4(1, 1, 1, 1), glm::vec3(0), 1.f, 8, 1.5f);
+
+		return GenObject(vertices, indices, PrimitiveType::TRIANGLES, numInstances);
+	}
+	
+	Mesh* FMegaObjectFactory::GenTunnel(uint32 numInstances) {
+		std::vector<ColorVertex> vertices;
+		std::vector<uint32> indices;
+
+		float r = Tunnel::Radius;
+		int xyQuality = 30;
+		float minLength = 1000;
+		float uvScale = 5.f;
+
+		float angleStep = glm::two_pi<float>() / xyQuality;
+		float quadSize = r * sqrt(2 - 2 * glm::cos(angleStep));
+		int zQuality = int(glm::ceil(minLength / quadSize)) + 1;
+		float length = (zQuality - 1) * quadSize;
+		float length2 = length * 0.5f;
+
+		for (int i = 0; i < zQuality; i++) {
+			float amountZ = float(i) / xyQuality;
+			float z = float(i) * quadSize - length2;
+			for (int j = 0; j <= xyQuality; j++) {
+				float amountXY = float(j) / xyQuality;
+				float theta = amountXY * glm::two_pi<float>();
+				float c = glm::cos(theta);
+				float s = glm::sin(theta);
+				glm::vec3 p = glm::vec3(r * c, r * s, z);
+
+				ColorVertex v;
+				v.position = glm::vec4(p, 1.f);
+				v.color = glm::vec4(0.f, 0.f, 0.f, 1.f);
+				v.uv = glm::vec4(amountXY * uvScale, amountZ * uvScale, 0.f, 0.f);
+				v.normal = glm::vec4(-c, -s, 0, 0);
+				v.tangent = glm::vec4(0);
+				vertices.push_back(v);
+			}
+		}
+
+		for (int i = 0; i < zQuality - 1; i++) {
+			for (int j = 0; j < xyQuality; j++) {
+				int inds[] = {
+					(j + 0) + (i + 0) * (xyQuality + 1),
+					(j + 0) + (i + 1) * (xyQuality + 1),
+					(j + 1) + (i + 0) * (xyQuality + 1),
+					(j + 1) + (i + 1) * (xyQuality + 1),
+				};
+				GenFace(vertices, indices, inds[0], inds[1], inds[2], false, false);
+				GenFace(vertices, indices, inds[1], inds[2], inds[3], false, false);
+			}
+		}
+
+		GenTangents(vertices.data(), vertices.size(), indices.data(), indices.size());
 
 		return GenObject(vertices, indices, PrimitiveType::TRIANGLES, numInstances);
 	}
@@ -89,11 +144,20 @@ namespace fmega {
 		}
 	}
 
+	Mesh* FMegaObjectFactory::GenLamp(uint32 numInstances) {
+		std::vector<ColorVertex> vertices;
+		std::vector<uint32> indices;
+
+		GenSmoothCube(vertices, indices, glm::vec4(1, 1, 1, 1), glm::vec3(0), 1.f, 2, 1.5f);
+
+		return GenObject(vertices, indices, PrimitiveType::TRIANGLES, numInstances);
+	}
+
 	void FMegaObjectFactory::GenFace(
 		std::vector<ColorVertex>& vertices,
 		std::vector<uint32>& indices,
 		int v0, int v1, int v2,
-		bool isOutward) {
+		bool isOutward, bool addNormal) {
 
 		glm::vec3 p[3] = { vertices[v0].position, vertices[v1].position, vertices[v2].position };
 		glm::vec3 normal = GetNormal(p[0], p[1], p[2]);
@@ -104,9 +168,11 @@ namespace fmega {
 			std::swap(v0, v1);
 		}
 
-		vertices[v0].normal += glm::vec4(normal, 0.f);
-		vertices[v1].normal += glm::vec4(normal, 0.f);
-		vertices[v2].normal += glm::vec4(normal, 0.f);
+		if (addNormal) {
+			vertices[v0].normal += glm::vec4(normal, 0.f);
+			vertices[v1].normal += glm::vec4(normal, 0.f);
+			vertices[v2].normal += glm::vec4(normal, 0.f);
+		}
 
 		indices.push_back(v0);
 		indices.push_back(v1);
@@ -133,7 +199,7 @@ namespace fmega {
 
 					glm::vec3 sum = glm::vec3(0);
 					int count = 0;
-					/*for (int e = 0; e < 27; e++) {
+					for (int e = 0; e < 27; e++) {
 						if (e == 1 + 3 + 9) continue;
 						int ni = i + ((e / 1) % 3) - 1;
 						int nj = j + ((e / 3) % 3) - 1;
@@ -142,8 +208,8 @@ namespace fmega {
 						if (it == posToId.end()) continue;
 						count++;
 						sum += glm::vec3(ni, nj, nk) / float(quality - 1);
-					}*/
-					for (int e = 0; e < 125; e++) {
+					}
+					/*for (int e = 0; e < 125; e++) {
 						if (e == 1 + 5 + 25) continue;
 						int ni = i + ((e / 1) % 5)  - 2;
 						int nj = j + ((e / 5) % 5)  - 2;
@@ -152,7 +218,7 @@ namespace fmega {
 						if (it == posToId.end()) continue;
 						count++;
 						sum += glm::vec3(ni, nj, nk) / float(quality - 1);
-					}
+					}*/
 					sum /= count;
 					glm::vec3 op = glm::vec3(i, j, k) / float(quality - 1);
 					glm::vec3 p = glm::lerp(op, sum, smoothAmount);
@@ -722,6 +788,11 @@ namespace fmega {
 		for (uint32 i = 0; i < numVertices; i++) {
 			auto& v = vertices[i];
 			v.tangent = glm::normalize(v.tangent);
+
+			if (glm::isnan(v.tangent) != glm::bvec4(0) || glm::abs(glm::length2(v.tangent) - 1.f) >= 1e-4f) {
+				v.tangent = v.normal + glm::vec4(1, 1, 1, 0);
+			}
+
 			v.tangent = glm::normalize(v.tangent - glm::dot(v.tangent, v.normal) * v.normal);
 		}
 	}
@@ -762,6 +833,11 @@ namespace fmega {
 		for (uint32 i = 0; i < numVertices; i++) {
 			auto& v = vertices[i];
 			v.tangent = glm::normalize(v.tangent);
+
+			if (glm::isnan(v.tangent) != glm::bvec4(0) || glm::abs(glm::length2(v.tangent) - 1.f) >= 1e-4f) {
+				v.tangent = v.normal + glm::vec4(1, 1, 1, 0);
+			}
+
 			v.tangent = glm::normalize(v.tangent - glm::dot(v.tangent, v.normal) * v.normal);
 		}
 	}
@@ -783,6 +859,8 @@ namespace fmega {
 		m->FinishBuffer();
 
 		m->AddBuffer(instbo);
+		m->PushToBufferFormat(MeshVariableType::FLOAT32, 4, false, 1);
+		m->PushToBufferFormat(MeshVariableType::FLOAT32, 4, false, 1);
 		m->PushToBufferFormat(MeshVariableType::FLOAT32, 4, false, 1);
 		m->PushToBufferFormat(MeshVariableType::FLOAT32, 4, false, 1);
 		m->PushToBufferFormat(MeshVariableType::FLOAT32, 4, false, 1);

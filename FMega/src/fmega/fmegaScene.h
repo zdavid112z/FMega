@@ -29,21 +29,26 @@ namespace fmega {
 		PlatformManager* GetPlatformManager() { return m_PlatformManager; }
 		RewindManager* GetRewind() { return m_Rewind; }
 
+		Texture2D* TunnelAlbedo;
+		Texture2D* TunnelNormalmap;
+		Texture2D* TunnelRoughness;
+
 		Texture2D* PlatformAlbedo;
 		Texture2D* PlatformNormalmap;
 		Texture2D* PlatformRoughness;
 		Texture2D* PlatformMetalness;
 
+		Mesh* TunnelMesh;
 		Mesh* BoxMesh;
 		Mesh* SegmentMesh;
 		Mesh* SphereMesh;
 		Mesh* PickupMesh;
 		float MoveSpeed;
 		Camera* UICamera;
+		bool SlowDeath;
 	protected:
 		void Restart();
 	protected:
-		bool m_SlowDeath;
 		float m_PlayerRadius;
 		FMegaRenderer* m_Renderer;
 		RestartManager* m_RestartManager;

@@ -9,6 +9,7 @@
 #include "core/game.h"
 #include "gameOverEvent.h"
 #include "entities/light.h"
+#include "entities/tunnel.h"
 
 namespace fmega {
 
@@ -16,7 +17,7 @@ namespace fmega {
 	{
 		auto gameOverEventType = m_Game->GetEventManager()->RegisterEventType("GameOver");
 
-		m_SlowDeath = false;
+		SlowDeath = false;
 		MoveSpeed = 15.f;
 
 		m_PlayerRadius = 0.5f;
@@ -30,6 +31,11 @@ namespace fmega {
 		PlatformRoughness = new Texture2D("assets/textures/floor_tiles_06_metal2.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
 		PlatformMetalness = new Texture2D("assets/textures/floor_tiles_06_metal2.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
 
+		TunnelAlbedo = new Texture2D("assets/textures/Concrete_wall_02_1K_Base_Color.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		TunnelNormalmap = new Texture2D("assets/textures/Concrete_wall_02_1K_Normal.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		TunnelRoughness = new Texture2D("assets/textures/Concrete_wall_02_1K_Roughness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+
+		TunnelMesh = FMegaObjectFactory::GenTunnel(1);
 		BoxMesh = FMegaObjectFactory::GenBox(1024);
 		SegmentMesh = FMegaObjectFactory::GenSegment(64);
 		SphereMesh = FMegaObjectFactory::GenSphere(1);
@@ -41,7 +47,7 @@ namespace fmega {
 		l.function = [this](Event e) {
 			// TODO: check if player has rewind
 			GameOverEventData* data = (GameOverEventData*)e.data;
-			m_SlowDeath = data->isSlow;
+			SlowDeath = data->isSlow;
 			m_RestartManager->OnPlayerLost(data->isSlow);
 			return false;
 		};
@@ -53,6 +59,7 @@ namespace fmega {
 	}
 
 	void FMegaScene::Restart() {
+		SlowDeath = false;
 		for (auto e : m_Entities) {
 			delete e;
 		}
@@ -65,6 +72,7 @@ namespace fmega {
 
 		m_Skybox = new Skybox("Skybox", nullptr, this);
 		AddEntity(m_Skybox);
+		AddEntity(new Tunnel("Tunnel", nullptr, this));
 		AddEntity(new LevelManager("Manager", nullptr, this));
 		Player* player = new Player("Player", nullptr, this, m_PlayerRadius);
 		AddEntity(player);
@@ -100,11 +108,16 @@ namespace fmega {
 			delete m_PlatformManager;
 		}
 
+		delete TunnelAlbedo;
+		delete TunnelRoughness;
+		delete TunnelNormalmap;
+
 		delete PlatformAlbedo;
 		delete PlatformNormalmap;
 		delete PlatformRoughness;
 		delete PlatformMetalness;
 
+		delete TunnelMesh;
 		delete PickupMesh;
 		delete m_Rewind;
 		delete m_RestartManager;
@@ -157,14 +170,14 @@ namespace fmega {
 		glDepthMask(GL_TRUE);
 		glEnable(GL_CULL_FACE);
 		glClearColor(0.1f, 0.15f, 0.3f, 1);
-		bool noClearColor = m_RestartManager->HasLost() && m_SlowDeath;
+		bool noClearColor = m_RestartManager->HasLost() && SlowDeath;
 		if (noClearColor) {
 			glClear(GL_DEPTH_BUFFER_BIT);
 		}
 		else {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		}
-		m_Renderer->SetShake(m_RestartManager->HasLost() && m_SlowDeath);
+		m_Renderer->SetShake(m_RestartManager->HasLost() && SlowDeath);
 
 		float adjDelta = m_RestartManager->GetAdjDelta(delta);
 		m_Renderer->Prepare(adjDelta, m_Skybox->Offset);

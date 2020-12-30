@@ -26,6 +26,12 @@ in VertexData
 	float vTexOpacity;
 	mat3 vTBN;
 	vec4 vColor;
+	float vRoughness;
+	float vRoughnessMapStrength;
+	float vMetalness;
+	float vMetalMapStrength;
+	vec3 vInstNormal;
+	float vNormalMapStrength;
 } vData;
 
 uniform sampler2D uAlbedoMap;
@@ -48,13 +54,16 @@ vec3 CalcLights(vec3 pos, vec3 N, vec3 albedo, float metalness, float roughness,
 void main()
 {
 	vec3 pos = vData.vPosition;
-	vec3 normalmapValue = (texture(uNormalMap, vData.vUV) * 2.0 - 1.0).rgb;
+
+	vec3 normalmapValue = mix(vData.vInstNormal, (texture(uNormalMap, vData.vUV) * 2.0 - 1.0).rgb, vData.vNormalMapStrength);
+	float metalness = mix(vData.vMetalness, texture(uMetalnessMap, vData.vUV).r, vData.vMetalMapStrength);
+	float roughness = mix(vData.vRoughness, texture(uRoughnessMap, vData.vUV).r, vData.vRoughnessMapStrength);
+
 	vec3 normal = normalize(vData.vTBN * normalmapValue);
+
 	vec4 texColor = pow(texture(uAlbedoMap, vData.vUV), vec4(2.2, 2.2, 2.2, 1.0));
 	vec4 albedo = vec4(mix(vData.vColor.rgb, texColor.rgb, vData.vTexOpacity), vData.vColor.a * texColor.a);
 	albedo = pow(albedo, vec4(2.2, 2.2, 2.2, 1.0));
-	float metalness = texture(uMetalnessMap, vData.vUV).r;
-	float roughness = texture(uRoughnessMap, vData.vUV).r;
 	vec3 F0 = vec3(0.04); 
     F0 = mix(F0, albedo.rgb, metalness);
 
@@ -64,7 +73,13 @@ void main()
 		discard;
 	}
 
-	vec3 light = CalcLights(pos, normal, albedo.rgb, metalness, roughness, F0);
+	// vec3 light = CalcLights(pos, normal, albedo.rgb, metalness, roughness, F0);
+	vec3 V = normalize(uEyePosition - pos);
+	vec3 light = 
+		CalcPointLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uPointLights[0]) + 
+		CalcPointLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uPointLights[1]) + 
+		CalcPointLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uPointLights[2]) + 
+		CalcPointLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uPointLights[3]);
 
 	vec3 ambient = vec3(0.1) * albedo.rgb;
 	vec3 color = ambient + light;

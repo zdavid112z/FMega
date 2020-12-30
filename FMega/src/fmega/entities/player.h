@@ -24,6 +24,7 @@ namespace fmega {
 	private:
 		void Die(float isSlow);
 		void HandlePlatformCollision();
+		void HandleTunnelCollision();
 		void HandleLostAnimation(float delta);
 		void CalcHeight(float delta);
 		void OnLandOnPlatform(Platform* p);

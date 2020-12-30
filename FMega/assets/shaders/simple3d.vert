@@ -10,7 +10,9 @@ layout (location = 3) in vec4 aNormal;
 layout (location = 4) in vec4 aTangent;
 layout (location = 5) in mat4 aModel;
 layout (location = 9) in vec4 aObjectColor;
-layout (location = 10) in vec4 aOpacity;
+layout (location = 10) in vec4 aInstNormal;
+layout (location = 11) in vec4 aOpacity;
+layout (location = 12) in vec4 aMetalness;
 
 layout(std140) uniform DynamicSceneBuffer
 {
@@ -33,6 +35,12 @@ out VertexData
 	float vTexOpacity;
 	mat3 vTBN;
 	vec4 vColor;
+	float vRoughness;
+	float vRoughnessMapStrength;
+	float vMetalness;
+	float vMetalMapStrength;
+	vec3 vInstNormal;
+	float vNormalMapStrength;
 } vData;
 
 void main()
@@ -48,4 +56,10 @@ void main()
 	vData.vTBN = mat3(worldTangent, worldBitangent, worldNormal);
 	vData.vColor = color;
 	vData.vTexOpacity = aOpacity.y;
+	vData.vRoughness = aOpacity.z;
+	vData.vRoughnessMapStrength = aOpacity.w;
+	vData.vMetalness = aMetalness.x;
+	vData.vMetalMapStrength = aMetalness.y;
+	vData.vInstNormal = aInstNormal.xyz;
+	vData.vNormalMapStrength = aInstNormal.w;
 }

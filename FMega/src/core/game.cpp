@@ -22,6 +22,11 @@ namespace fmega {
 		delete m_Display;
 	}
 
+	void Game::ChangeScene(SceneChangeSchedule schedule) {
+		m_ShouldChangeScene = true;
+		m_SceneChangeSchedule = schedule;
+	}
+
 	void Game::Update()
 	{
 		/*if (m_ShouldChangeScene)
@@ -80,6 +85,7 @@ namespace fmega {
 
 	void Game::InitNewScene()
 	{
+		m_UpdateTimer.Reset();
 		m_Display->PollEvents();
 		m_Scene->Update(m_UpdateTimer.GetDelta());
 		m_Display->GetInput()->PostLogicUpdate();

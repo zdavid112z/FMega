@@ -2,6 +2,7 @@
 
 #include "graphics/shader.h"
 #include "graphics/mesh.h"
+#include "graphics/texture2d.h"
 #include "graphics/gpuBuffer.h"
 #include "fmegaObjectFactory.h"
 
@@ -64,20 +65,43 @@ namespace fmega {
 	#pragma pack(pop)
 
 	enum class MeshType : uint {
-		MESH_2D,
 		MESH_3D,
-		COUNT
+		MESH_2D,
+		COUNT,
+		INVALID,
+	};
+
+	struct QueueKey {
+		bool ui = false;
+		bool transparent = false;
+		MeshType type = MeshType::INVALID;
+		Mesh* mesh = nullptr;
+		Texture2D* albedo = nullptr;
+		Texture2D* normal = nullptr;
+		Texture2D* roughness = nullptr;
+		Texture2D* metalness = nullptr;
+
+		bool operator<(const QueueKey& k) const {
+			if (ui != k.ui) {
+				return ui < k.ui;
+			}
+			if (transparent != k.transparent) {
+				return transparent < k.transparent;
+			}
+			return int(type) < int(k.type);
+		}
 	};
 
 	class FMegaRenderer {
 	public:
-		using QueueType = std::map< std::pair<bool, Mesh*>, std::vector<MeshRenderData> >;
+		using QueueType = std::map<QueueKey, std::vector<MeshRenderData>>;
 
 		FMegaRenderer(FMegaScene* scene, float playerRadius);
 		~FMegaRenderer();
 
 		void Prepare(float delta, float skyboxOffset);
 		void RenderMesh(Mesh* mesh, MeshRenderData data, bool isUI = false, MeshType type = MeshType::MESH_2D, bool isTransparent = false);
+		void RenderMesh(QueueKey key, MeshRenderData data);
 		void RenderDigit(Mesh* segment, MeshRenderData data, int digit);
 		void RenderAll();
 		void RenderPlatform(Mesh* mesh, const glm::mat4& model, const glm::vec4& color);
@@ -86,8 +110,8 @@ namespace fmega {
 		void SetShake(bool shake);
 
 	private:
-		void RenderMesh(QueueType::iterator&, bool bindShader, MeshType type);
-		void BindShader(MeshType type);
+		void RenderMesh(QueueType::iterator&, bool bindShader);
+		void BindShaderAndTextures(QueueKey key);
 
 	public:
 		float m_ShakeTime;
@@ -101,7 +125,7 @@ namespace fmega {
 		Shader* m_PlatformShader;
 		Shader* m_PlayerShader;
 		Shader* m_Shaders[uint(MeshType::COUNT)];
-		QueueType m_Queue[uint(MeshType::COUNT)][2];
+		QueueType m_Queue;
 	};
 
 }

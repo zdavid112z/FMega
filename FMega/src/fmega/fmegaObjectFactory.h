@@ -10,15 +10,19 @@ namespace fmega {
 	struct MeshRenderData {
 		glm::mat4 model = glm::mat4(1);
 		glm::vec4 color = glm::vec4(0);
-		union {
-			struct {
-				float opacity;
-				float textureOpacity;
-				float unused1;
-				float unused2;
-			};
-			glm::vec4 opacityVec = glm::vec4(1, 0, 0, 0);
-		};
+
+		glm::vec3 normal = glm::vec3(0, 0, 1);
+		float normalmapStrength = 0.f;
+
+		float opacity = 1.f;
+		float albedoStrength = 0.f;
+		float roughness = 0.3f;
+		float roughnessmapStrength = 0.f;
+
+		float metalness = 0.3f;
+		float metalnessmapStrength = 0.f;
+		float unused1 = 0.f;
+		float unused2 = 0.f;
 	};
 
 	struct ColorVertex {
@@ -86,6 +90,8 @@ namespace fmega {
 		static Mesh* GenHeart(uint32 numInstances);
 		static Mesh* GenSphere(uint32 numInstances);
 		static Mesh* GenPickup(uint32 numInstances);
+		static Mesh* GenTunnel(uint32 numInstances);
+		static Mesh* GenLamp(uint32 numInstances);
 		static void GenPlatformMeshData(
 			PlatformVertex* vertices,
 			uint32* indices,
@@ -156,7 +162,7 @@ namespace fmega {
 			std::vector<ColorVertex>& vertices,
 			std::vector<uint32>& indices,
 			int v0, int v1, int v2,
-			bool isOutward);
+			bool isOutward, bool addNormal = true);
 		static void GenTangents(
 			ColorVertex* vertices,
 			uint32 numVertices,

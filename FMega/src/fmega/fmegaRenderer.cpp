@@ -45,11 +45,19 @@ namespace fmega {
 
 	void FMegaRenderer::RenderMesh(Mesh* mesh, MeshRenderData data, bool isUI, MeshType type, bool isTransparent)
 	{
-		QueueType& q = m_Queue[int(type)][isTransparent];
-		if (!isUI) {
+		QueueKey k;
+		k.mesh = mesh;
+		k.ui = isUI;
+		k.transparent = isTransparent;
+		k.type = type;
+		RenderMesh(k, data);
+	}
+
+	void FMegaRenderer::RenderMesh(QueueKey key, MeshRenderData data) {
+		QueueType& q = m_Queue;
+		if (!key.ui) {
 			data.model = m_ShakeMatrix * data.model;
 		}
-		auto key = std::make_pair(isUI, mesh);
 		auto it = q.find(key);
 		if (it == q.end()) {
 			q[key] = { data };
@@ -58,39 +66,44 @@ namespace fmega {
 		else {
 			it->second.push_back(data);
 		}
-		int batchSize = it->first.second->GetVBO(1)->GetSize() / sizeof(MeshRenderData);
-		if (it->second.size() == batchSize) {
-			RenderMesh(it, true, type);
-		}
 	}
 
 	void FMegaRenderer::RenderAll()
 	{
-		for (int t = 0; t < 2; t++) {
-			for (int i = 0; i < int(MeshType::COUNT); i++) {
-				BindShader(MeshType(i));
+		MeshType prevType = MeshType::INVALID;
 
-				for (auto it = m_Queue[i][t].begin(); it != m_Queue[i][t].end(); it++) {
-					RenderMesh(it, false, MeshType(i));
-				}
-			}
+		for (auto it = m_Queue.begin(); it != m_Queue.end(); it++) {
+			BindShaderAndTextures(it->first);
+			RenderMesh(it, false);
 		}
-		glEnable(GL_DEPTH_TEST);
 	}
 
-	void FMegaRenderer::BindShader(MeshType type) {
-		int i = int(type);
+	void FMegaRenderer::BindShaderAndTextures(QueueKey key) {
+		int i = int(key.type);
 		m_Shaders[i]->Bind();
-		if (type == MeshType::MESH_2D) {
+		if (key.type == MeshType::MESH_2D) {
 			m_Shaders[i]->SetBuffer("UIBuffer", m_UIBuffer);
 		}
-		else if (type == MeshType::MESH_3D) {
+		else if (key.type == MeshType::MESH_3D) {
 			m_Shaders[i]->SetBuffer("DynamicSceneBuffer", m_DynamicSceneBuffer);
+		}
+		if (key.albedo) {
+			m_Shaders[i]->SetTexture("uAlbedoMap", key.albedo);
+		}
+		if (key.normal) {
+			m_Shaders[i]->SetTexture("uNormalMap", key.normal);
+		}
+		if (key.roughness) {
+			m_Shaders[i]->SetTexture("uRoughnessMap", key.roughness);
+		}
+		if (key.metalness) {
+			m_Shaders[i]->SetTexture("uMetalnessMap", key.metalness);
 		}
 	}
 
-	void FMegaRenderer::RenderMesh(QueueType::iterator& it, bool bindShader, MeshType type)
+	void FMegaRenderer::RenderMesh(QueueType::iterator& it, bool bindShader)
 	{
+		MeshType type = it->first.type;
 		if (type == MeshType::MESH_2D)
 			glDisable(GL_DEPTH_TEST);
 		else glEnable(GL_DEPTH_TEST);
@@ -104,11 +117,20 @@ namespace fmega {
 		}
 
 		if (bindShader) {
-			BindShader(type);
+			BindShaderAndTextures(key);
 		}
 
-		key.second->GetVBO(1)->SetSubdata((byte*)data.data(), data.size() * sizeof(MeshRenderData), 0);
-		key.second->DrawNow(data.size());
+		int batchSize = it->first.mesh->GetVBO(1)->GetSize() / sizeof(MeshRenderData);
+		int remainingMeshes = it->second.size();
+		int numBatches = (it->second.size() + batchSize - 1) / batchSize;
+		for (int i = 0; i < numBatches; i++) {
+			int currentStart = i * batchSize;
+			int currentSize = glm::min(batchSize, remainingMeshes);
+			remainingMeshes -= currentSize;
+
+			key.mesh->GetVBO(1)->SetSubdata((byte*)(&data[currentStart]), currentSize * sizeof(MeshRenderData), 0);
+			key.mesh->DrawNow(currentSize);
+		}
 
 		data.clear();
 	}
@@ -206,7 +228,7 @@ namespace fmega {
 		});
 
 		for (int i = 0; i < NUM_POINT_LIGHTS; i++) {
-			if (i >= pointLights.size()) {
+			if (i >= (int)pointLights.size()) {
 				bufferData.pointLights[i].color = glm::vec4(0);
 			}
 			else {
@@ -215,7 +237,7 @@ namespace fmega {
 		}
 
 		for (int i = 0; i < NUM_SPOT_LIGHTS; i++) {
-			if (i >= spotLights.size()) {
+			if (i >= (int)spotLights.size()) {
 				bufferData.spotLights[i].color = glm::vec4(0);
 			}
 			else {

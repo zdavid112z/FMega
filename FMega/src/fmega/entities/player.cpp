@@ -6,6 +6,7 @@
 #include "fmega/fmegaRenderer.h"
 #include "utils/random.h"
 #include "fmega/gameOverEvent.h"
+#include "tunnel.h"
 
 namespace fmega {
 
@@ -246,6 +247,19 @@ namespace fmega {
 				HandleCollision(p, delta);
 			}
 		});
+
+		HandleTunnelCollision();
+	}
+
+	void Player::HandleTunnelCollision() {
+		float r = Tunnel::Radius;
+		glm::vec2 p = glm::vec2(m_LocalTransform.position.x, m_BottomY);
+		float d = glm::length(p);
+		if (d > r) {
+			glm::vec2 pToO = -glm::normalize(p);
+			m_LocalTransform.position.x += pToO.x * (d - r);
+			m_BottomY += pToO.y * (d - r);
+		}
 	}
 
 	bool Player::IsOnTopOf(Platform* p) {
@@ -343,7 +357,7 @@ namespace fmega {
 				glm::scale(glm::mat4(1.f), glm::vec3(fuelAmount * 16.f, m_FuelBoxHeight / 2.f, 1));
 			data.color = m_FuelColor;
 			data.opacity = 1.f;
-			data.textureOpacity = 0.f;
+			data.albedoStrength = 0.f;
 			m_FMegaScene->GetRenderer()->RenderMesh(m_FMegaScene->BoxMesh, data, true);
 		}
 
@@ -353,7 +367,7 @@ namespace fmega {
 				glm::scale(glm::mat4(1.f), glm::vec3((1.f - fuelAmount) * 16.f, m_FuelBoxHeight / 2.f, 1));
 			data.color = m_FuelEmptyColor;
 			data.opacity = 1.f;
-			data.textureOpacity = 0.f;
+			data.albedoStrength = 0.f;
 			m_FMegaScene->GetRenderer()->RenderMesh(m_FMegaScene->BoxMesh, data, true);
 		}
 
@@ -363,7 +377,7 @@ namespace fmega {
 				glm::scale(glm::mat4(1.f), glm::vec3(16.f, m_MaxSpeedHeight / 2.f, 1));
 			data.color = glm::vec4(glm::sin(m_MaxSpeedFlicker * m_FMegaScene->GetGame()->GetTime()) * 0.3f + 0.7f, 0.2f, 0.2f, 1.0f);
 			data.opacity = 1.f;
-			data.textureOpacity = 0.f;
+			data.albedoStrength = 0.f;
 			m_FMegaScene->GetRenderer()->RenderMesh(m_FMegaScene->BoxMesh, data, true);
 		}
 
