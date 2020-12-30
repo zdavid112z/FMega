@@ -39,6 +39,11 @@ namespace fmega {
 			result.push_back(')');
 			return result;
 		}
+		static std::string ToString(void* val) { 
+			std::stringstream ss;
+			ss << std::hex << reinterpret_cast<size_t>(val);
+			return ss.str();
+		}
 
 		static bool StartsWith(const std::string& str, const std::string& prefix) {
 			return str.size() >= prefix.size() && memcmp(str.data(), prefix.data(), prefix.size()) == 0;

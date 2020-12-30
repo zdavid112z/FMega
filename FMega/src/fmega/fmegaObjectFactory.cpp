@@ -148,7 +148,7 @@ namespace fmega {
 		std::vector<ColorVertex> vertices;
 		std::vector<uint32> indices;
 
-		GenSmoothCube(vertices, indices, glm::vec4(1, 1, 1, 1), glm::vec3(0), 1.f, 2, 1.5f);
+		GenSmoothCube(vertices, indices, glm::vec4(1, 1, 1, 1), glm::vec3(0), 1.f, 3, 0.f);
 
 		return GenObject(vertices, indices, PrimitiveType::TRIANGLES, numInstances);
 	}

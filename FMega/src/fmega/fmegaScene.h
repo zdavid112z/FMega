@@ -32,6 +32,7 @@ namespace fmega {
 		Texture2D* TunnelAlbedo;
 		Texture2D* TunnelNormalmap;
 		Texture2D* TunnelRoughness;
+		Texture2D* TunnelMetalness;
 
 		Texture2D* PlatformAlbedo;
 		Texture2D* PlatformNormalmap;
@@ -39,6 +40,7 @@ namespace fmega {
 		Texture2D* PlatformMetalness;
 
 		Mesh* TunnelMesh;
+		Mesh* LampMesh;
 		Mesh* BoxMesh;
 		Mesh* SegmentMesh;
 		Mesh* SphereMesh;

@@ -6,8 +6,8 @@
 #include "graphics/gpuBuffer.h"
 #include "fmegaObjectFactory.h"
 
-#define NUM_POINT_LIGHTS 4
-#define NUM_SPOT_LIGHTS  4
+#define NUM_POINT_LIGHTS 16
+#define NUM_SPOT_LIGHTS  16
 
 namespace fmega {
 
@@ -88,7 +88,25 @@ namespace fmega {
 			if (transparent != k.transparent) {
 				return transparent < k.transparent;
 			}
-			return int(type) < int(k.type);
+			if (type != k.type) {
+				return int(type) < int(k.type);
+			}
+			if (mesh != k.mesh) {
+				return mesh < k.mesh;
+			}
+			if (albedo != k.albedo) {
+				return albedo < k.albedo;
+			}
+			if (normal != k.normal) {
+				return normal < k.normal;
+			}
+			if (roughness != k.roughness) {
+				return roughness < k.roughness;
+			}
+			if (metalness != k.metalness) {
+				return metalness < k.metalness;
+			}
+			return false;
 		}
 	};
 

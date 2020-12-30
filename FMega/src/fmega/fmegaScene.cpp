@@ -10,6 +10,7 @@
 #include "gameOverEvent.h"
 #include "entities/light.h"
 #include "entities/tunnel.h"
+#include "entities/lamp.h"
 
 namespace fmega {
 
@@ -26,15 +27,26 @@ namespace fmega {
 		UICamera = new Camera();
 		UICamera->viewProjection = glm::ortho(-16.f, 16.f, -9.f, 9.f, -1000.f, 1000.f);
 
-		PlatformAlbedo = new Texture2D("assets/textures/floor_tiles_06_diff_1k_metal.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		/*PlatformAlbedo = new Texture2D("assets/textures/floor_tiles_06_diff_1k_metal.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
 		PlatformNormalmap = new Texture2D("assets/textures/floor_tiles_06_nor_1k2.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
 		PlatformRoughness = new Texture2D("assets/textures/floor_tiles_06_metal2.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
-		PlatformMetalness = new Texture2D("assets/textures/floor_tiles_06_metal2.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		PlatformMetalness = new Texture2D("assets/textures/floor_tiles_06_metal2.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);*/
 
-		TunnelAlbedo = new Texture2D("assets/textures/Concrete_wall_02_1K_Base_Color.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		PlatformAlbedo = new Texture2D("assets/textures/MetalPlates001_1K_Color.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		PlatformNormalmap = new Texture2D("assets/textures/MetalPlates001_1K_Normal.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		PlatformRoughness = new Texture2D("assets/textures/MetalPlates001_1K_Roughness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		PlatformMetalness = new Texture2D("assets/textures/MetalPlates001_1K_Metalness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+
+		/*TunnelAlbedo = new Texture2D("assets/textures/Concrete_wall_02_1K_Base_Color.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
 		TunnelNormalmap = new Texture2D("assets/textures/Concrete_wall_02_1K_Normal.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
-		TunnelRoughness = new Texture2D("assets/textures/Concrete_wall_02_1K_Roughness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		TunnelRoughness = new Texture2D("assets/textures/Concrete_wall_02_1K_Roughness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);*/
 
+		TunnelAlbedo = new Texture2D("assets/textures/MetalPlates008_1K_Color.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		TunnelNormalmap = new Texture2D("assets/textures/MetalPlates008_1K_Normal.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		TunnelRoughness = new Texture2D("assets/textures/MetalPlates008_1K_Roughness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		TunnelMetalness = new Texture2D("assets/textures/MetalPlates008_1K_Metalness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+
+		LampMesh = FMegaObjectFactory::GenLamp(4);
 		TunnelMesh = FMegaObjectFactory::GenTunnel(1);
 		BoxMesh = FMegaObjectFactory::GenBox(1024);
 		SegmentMesh = FMegaObjectFactory::GenSegment(64);
@@ -80,7 +92,7 @@ namespace fmega {
 		glm::vec3 atten = glm::vec3(1.f, 0.1f, 0.001f);
 		float intensity = 50.f;
 
-		Light* mainLight1 = new Light("Main1", nullptr, this, glm::vec3(1, 1, 1), intensity, atten);
+		/*Light* mainLight1 = new Light("Main1", nullptr, this, glm::vec3(1, 1, 1), intensity, atten);
 		mainLight1->GetLocalTransform().position = glm::vec3(5, 5, 2);
 		AddEntity(mainLight1);
 
@@ -94,7 +106,20 @@ namespace fmega {
 
 		Light* mainLight4 = new Light("Main4", nullptr, this, glm::vec3(1, 1, 1), intensity, atten);
 		mainLight4->GetLocalTransform().position = glm::vec3(-5, -5, 2);
-		AddEntity(mainLight4);
+		AddEntity(mainLight4);*/
+
+		int numLamps = 16;
+		float lampDist = 25.f;
+		float lampResetZ = 80;
+		for (int i = 0; i < numLamps; i++) {
+			Lamp* lamp = new Lamp(std::to_string(i), nullptr, this, numLamps, lampDist, i, lampResetZ);
+			AddEntity(lamp);
+			Light* light = new Light("Lamp" + std::to_string(i), lamp, this, glm::vec3(1), 20.f, glm::vec3(1.f, 0.f, 0.f), glm::vec3(-1, 0, 0), glm::vec2(45, 60));
+			AddEntity(light);
+			Light* lightp = new Light("Point" + std::to_string(i), lamp, this, glm::vec3(1), 100.f, glm::vec3(1.f, 0.6f, 0.3f));
+			lightp->GetLocalTransform().position.x = -1.5f;
+			AddEntity(lightp);
+		}
 	}
 
 	FMegaScene::~FMegaScene()
@@ -111,12 +136,14 @@ namespace fmega {
 		delete TunnelAlbedo;
 		delete TunnelRoughness;
 		delete TunnelNormalmap;
+		delete TunnelMetalness;
 
 		delete PlatformAlbedo;
 		delete PlatformNormalmap;
 		delete PlatformRoughness;
 		delete PlatformMetalness;
 
+		delete LampMesh;
 		delete TunnelMesh;
 		delete PickupMesh;
 		delete m_Rewind;

@@ -128,9 +128,9 @@ void main()
 	vData.vColor = uColor + aColor;
 	vData.vTexOpacity = 0.8;
 
-    vData.vRoughness = 0.0;
+    vData.vRoughness = 0.2;
 	vData.vRoughnessMapStrength = 1.0;
-	vData.vMetalness = 0.0;
+	vData.vMetalness = 0.1;
 	vData.vMetalMapStrength = 1.0;
 	vData.vInstNormal = vec3(0, 0, 1);
 	vData.vNormalMapStrength = 1.0;

@@ -46,7 +46,7 @@ namespace fmega {
 		sl.color = glm::vec4(m_Color * m_Intensity, 1.f);
 		sl.position = glm::vec4(GetWorldPosition(), 1.f);
 		sl.atten = glm::vec4(m_Atten, 0.f);
-		sl.direction = glm::vec4(m_Direction, 0.f);
+		sl.direction = glm::vec4(GetDirection(), 0.f);
 		sl.innerCutoff = m_CutoffLimits.x;
 		sl.outerCutoff = m_CutoffLimits.y;
 		return sl;
@@ -61,7 +61,7 @@ namespace fmega {
 	glm::vec3 Light::GetDirection() {
 		glm::vec4 p = glm::vec4(m_Direction, 0.f);
 		p = m_GlobalTransform * p;
-		return glm::vec3(p);
+		return glm::normalize(glm::vec3(p));
 	}
 
 	void Light::Update(float delta) {

@@ -119,6 +119,7 @@
     <ClInclude Include="src\core\scene.h" />
     <ClInclude Include="src\fmega\cameras\fpCamera.h" />
     <ClInclude Include="src\fmega\cameras\gameCamera.h" />
+    <ClInclude Include="src\fmega\entities\lamp.h" />
     <ClInclude Include="src\fmega\entities\levelManager.h" />
     <ClInclude Include="src\fmega\entities\light.h" />
     <ClInclude Include="src\fmega\entities\pickup.h" />
@@ -189,6 +190,7 @@
     <ClCompile Include="src\core\scene.cpp" />
     <ClCompile Include="src\fmega\cameras\fpCamera.cpp" />
     <ClCompile Include="src\fmega\cameras\gameCamera.cpp" />
+    <ClCompile Include="src\fmega\entities\lamp.cpp" />
     <ClCompile Include="src\fmega\entities\levelManager.cpp" />
     <ClCompile Include="src\fmega\entities\light.cpp" />
     <ClCompile Include="src\fmega\entities\pickup.cpp" />

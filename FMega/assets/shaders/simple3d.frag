@@ -79,7 +79,35 @@ void main()
 		CalcPointLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uPointLights[0]) + 
 		CalcPointLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uPointLights[1]) + 
 		CalcPointLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uPointLights[2]) + 
-		CalcPointLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uPointLights[3]);
+		CalcPointLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uPointLights[3]) +
+		CalcPointLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uPointLights[4]) + 
+		CalcPointLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uPointLights[5]) + 
+		CalcPointLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uPointLights[6]) + 
+		CalcPointLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uPointLights[7]) +
+		CalcPointLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uPointLights[8]) + 
+		CalcPointLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uPointLights[9]) + 
+		CalcPointLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uPointLights[10]) + 
+		CalcPointLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uPointLights[11]) +
+		CalcPointLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uPointLights[12]) + 
+		CalcPointLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uPointLights[13]) + 
+		CalcPointLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uPointLights[14]) + 
+		CalcPointLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uPointLights[15]) +
+		CalcSpotLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uSpotLights[0]) +
+		CalcSpotLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uSpotLights[1]) +
+		CalcSpotLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uSpotLights[2]) +
+		CalcSpotLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uSpotLights[3]) + 
+		CalcSpotLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uSpotLights[4]) +
+		CalcSpotLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uSpotLights[5]) +
+		CalcSpotLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uSpotLights[6]) +
+		CalcSpotLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uSpotLights[7]) + 
+		CalcSpotLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uSpotLights[8]) +
+		CalcSpotLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uSpotLights[9]) +
+		CalcSpotLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uSpotLights[10]) +
+		CalcSpotLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uSpotLights[11]) + 
+		CalcSpotLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uSpotLights[12]) +
+		CalcSpotLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uSpotLights[13]) +
+		CalcSpotLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uSpotLights[14]) +
+		CalcSpotLight(pos, V, normal, F0, albedo.rgb, metalness, roughness, uSpotLights[15]);
 
 	vec3 ambient = vec3(0.1) * albedo.rgb;
 	vec3 color = ambient + light;

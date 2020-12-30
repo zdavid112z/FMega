@@ -38,7 +38,7 @@ namespace fmega {
 		d.roughnessmapStrength = 1.f;
 		d.normalmapStrength = 1.f;
 		d.metalness = 0.1f;
-		d.metalnessmapStrength = 0.f;
+		d.metalnessmapStrength = 1.f;
 		QueueKey k;
 		k.mesh = m_FMegaScene->TunnelMesh;
 		k.transparent = false;
@@ -47,6 +47,7 @@ namespace fmega {
 		k.albedo = m_FMegaScene->TunnelAlbedo;
 		k.normal = m_FMegaScene->TunnelNormalmap;
 		k.roughness = m_FMegaScene->TunnelRoughness;
+		k.metalness = m_FMegaScene->TunnelMetalness;
 		m_FMegaScene->GetRenderer()->RenderMesh(k, d);
 	}
 
