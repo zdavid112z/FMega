@@ -13,6 +13,7 @@ namespace fmega {
 		virtual void Render(float delta) override;
 
 		virtual byte* GetData(uint& size) override;
+		virtual void InterpolateDynamicData(float* p1, float* p2, float amount, float* out, int count);
 
 		const static float Radius;
 		const static float MoveSpeedModifier;

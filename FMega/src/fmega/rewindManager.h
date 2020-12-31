@@ -27,6 +27,7 @@ namespace fmega {
 		void Record();
 		float GetTargetTime();
 		bool Rewind();
+		void DeleteInvalidEntities();
 
 		bool m_Rewinding;
 		float m_RewindStartTime;

@@ -27,6 +27,10 @@ namespace fmega {
 		m_SceneChangeSchedule = schedule;
 	}
 
+	void Game::OnSceneRestarted() {
+		InitNewScene();
+	}
+
 	void Game::Update()
 	{
 		/*if (m_ShouldChangeScene)

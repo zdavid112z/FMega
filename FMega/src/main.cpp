@@ -28,7 +28,7 @@ int main() {
 	data.width = 1280;
 	data.height = 720;
 	data.title = "Haha";
-	data.swapInterval = 1;
+	data.swapInterval = 0;
 	data.fpsLimit = 0;
 	data.fullscreen = 0;
 	GameData gdata;

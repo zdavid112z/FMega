@@ -2,6 +2,7 @@
 #include "pickup.h"
 #include "../fmegaScene.h"
 #include "../fmegaRenderer.h"
+#include "light.h"
 
 namespace fmega {
 

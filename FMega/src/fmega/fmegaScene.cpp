@@ -53,7 +53,7 @@ namespace fmega {
 		SphereMesh = FMegaObjectFactory::GenSphere(1);
 		PickupMesh = FMegaObjectFactory::GenPickup(128);
 		m_Renderer = new FMegaRenderer(this, m_PlayerRadius);
-		m_Rewind = new RewindManager(this, 180, 4.f);
+		m_Rewind = new RewindManager(this, 30, 4.f);
 
 		EventListener l;
 		l.function = [this](Event e) {
@@ -112,11 +112,15 @@ namespace fmega {
 		float lampDist = 25.f;
 		float lampResetZ = 80;
 		for (int i = 0; i < numLamps; i++) {
+			glm::vec3 m = glm::vec3(1);
+			if (i % 3 == 0) {
+				m = glm::vec3(1.2, 0.2, 0.1);
+			}
 			Lamp* lamp = new Lamp(std::to_string(i), nullptr, this, numLamps, lampDist, i, lampResetZ);
 			AddEntity(lamp);
-			Light* light = new Light("Lamp" + std::to_string(i), lamp, this, glm::vec3(1), 20.f, glm::vec3(1.f, 0.f, 0.f), glm::vec3(-1, 0, 0), glm::vec2(45, 60));
+			Light* light = new Light("Lamp" + std::to_string(i), lamp, this, glm::vec3(1, 1, 1.4) * m, 20.f, glm::vec3(1.f, 0.f, 0.f), glm::vec3(-1, 0, 0), glm::vec2(45, 60));
 			AddEntity(light);
-			Light* lightp = new Light("Point" + std::to_string(i), lamp, this, glm::vec3(1), 100.f, glm::vec3(1.f, 0.6f, 0.3f));
+			Light* lightp = new Light("Point" + std::to_string(i), lamp, this, glm::vec3(1, 1, 1.8) * m, 100.f, glm::vec3(1.f, 0.6f, 0.3f));
 			lightp->GetLocalTransform().position.x = -1.5f;
 			AddEntity(lightp);
 		}
@@ -169,6 +173,8 @@ namespace fmega {
 	{
 		if (m_RestartManager->ShouldRestart()) {
 			Restart();
+			m_Game->OnSceneRestarted();
+			return;
 		}
 
 		UpdateGlobalTransforms();

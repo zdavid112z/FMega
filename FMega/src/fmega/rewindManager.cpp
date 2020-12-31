@@ -29,12 +29,24 @@ namespace fmega {
 		if (IsRewinding()) {
 			m_Rewinding = Rewind();
 			if (!m_Rewinding) {
+				DeleteInvalidEntities();
 				DeleteHistory();
 			}
 		}
 		else {
 			Record();
 		}
+	}
+
+	void RewindManager::DeleteInvalidEntities() {
+		m_Scene->ForeachEntity([this](Entity* ee) {
+
+			if (m_Frames[m_Head].nameToIndex.find(ee->GetName()) ==
+				m_Frames[m_Head].nameToIndex.end()) {
+
+				ee->Destroy();
+			}
+		});
 	}
 
 	bool RewindManager::IsRewinding() {
@@ -75,8 +87,7 @@ namespace fmega {
 			uint index = frame.data.size();
 			frame.nameToIndex[e->GetName()] = index;
 			frame.data.resize(index + e->GetSaveSize());
-			uint size;
-			e->Save(&frame.data[0] + index, size);
+			e->Save(&frame.data[0] + index);
 		});
 	}
 
@@ -88,7 +99,7 @@ namespace fmega {
 	float RewindManager::GetTargetTime() {
 		float t = m_Scene->GetGame()->GetTime();
 		float recDuration = m_MaxTime - m_MinTime;
-		float x = (t - m_RewindStartTime) / recDuration;
+		float x = (t - m_RewindStartTime) / recDuration + 0.01f;
 		if (x < 1) {
 			float s = glm::sign(x - 0.5f);
 			float o = (s + 1.f) * 0.5f;
@@ -104,28 +115,86 @@ namespace fmega {
 		}
 		float target = GetTargetTime();
 		int best = m_Head;
-		float bestDiff = 9999999.f;
+		float bestDiff = 1e4f;
 		int idx = m_Head;
+
+		int bestEarlier = -1;
+		float bestEarlierTime = target - 1e4f;
+		int bestLater = -1;
+		float bestLaterTime = target + 1e4f;
 		for (int i = 0; i < m_Size; i++) {
 
 			// TODO: Binary search
-			float diff = glm::abs(m_Frames[idx].time - target);
+			float t = m_Frames[idx].time;
+			float diff = glm::abs(t - target);
 			if (diff < bestDiff) {
 				best = idx;
 				bestDiff = diff;
 			}
+			if (t < target && bestEarlierTime < t) {
+				bestEarlierTime = t;
+				bestEarlier = idx;
+			}
+			if (t > target && bestLaterTime > t) {
+				bestLaterTime = t;
+				bestLater = idx;
+			}
 
 			idx = (idx + 1) % m_MaxSize;
 		}
+		bool hasEarlier = true;
+		bool hasLater = true;
+		if (bestEarlier == -1) {
+			hasEarlier = false;
+			bestEarlier = m_Head;
+		}
+		if (bestLater == -1) {
+			hasLater = false;
+			bestLater = m_Head;
+		}
 
 		DataFrame& frame = m_Frames[best];
-		m_Scene->ForeachEntity([this, &frame](Entity* ee) {
+		DataFrame& earlier = m_Frames[bestEarlier];
+		DataFrame& later = m_Frames[bestLater];
+		float amount = (target - bestEarlierTime) / (bestLaterTime - bestEarlierTime);
+		if (!hasEarlier) {
+			amount = 1.f;
+		}
+		if (!hasLater) {
+			amount = 0.f;
+		}
+		m_Scene->ForeachEntity([this, &frame, &earlier, &later, amount, target](Entity* ee) {
 			FMegaEntity* e = (FMegaEntity*)ee;
-			uint index = frame.nameToIndex[e->GetName()];
-			uint size;
-			e->Load(&frame.data[0] + index, size);
+
+			if (frame.nameToIndex.find(e->GetName()) == frame.nameToIndex.end() ||
+				earlier.nameToIndex.find(e->GetName()) == earlier.nameToIndex.end() ||
+				later.nameToIndex.find(e->GetName()) == later.nameToIndex.end()) {
+				return;
+			}
+
+			auto index = frame.nameToIndex[e->GetName()];
+			auto ptr = &frame.data[0] + index;
+			e->LoadStatic(ptr);
+			uint staticSize = e->GetStaticSaveSize();
+
+			auto indexEarlier = earlier.nameToIndex[e->GetName()];
+			auto ptrEarlier = &earlier.data[0] + indexEarlier;
+			auto dynamicEarlier = ptrEarlier + staticSize;
+			float* dynamicEarlierFloats = (float*)dynamicEarlier;
+
+			auto indexLater = later.nameToIndex[e->GetName()];
+			auto ptrLater = &later.data[0] + indexLater;
+			auto dynamicLater = ptrLater + staticSize;
+			float* dynamicLaterFloats = (float*)dynamicLater;
+
+			uint dynamicSize = e->GetSaveSize() - e->GetStaticSaveSize();
+			uint numFloats = dynamicSize / 4;
+			
+			std::vector<float> dynamicData(numFloats);
+			e->InterpolateDynamicData(dynamicEarlierFloats, dynamicLaterFloats, amount, dynamicData.data(), numFloats);
+			e->LoadDynamic((byte*)dynamicData.data());
 		});
-		return best != m_Head;
+		return bestLater != m_Head;
 	}
 
 	void RewindManager::DeleteHistory() {

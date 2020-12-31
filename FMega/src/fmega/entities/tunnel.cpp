@@ -56,4 +56,15 @@ namespace fmega {
 		return m_Data;
 	}
 
+	void Tunnel::InterpolateDynamicData(float* p1, float* p2, float amount, float* out, int count) {
+		FMegaEntity::InterpolateDynamicData(p1, p2, amount, out, count);
+		Transform* t1 = (Transform*)p1;
+		Transform* t2 = (Transform*)p2;
+		Transform* tout = (Transform*)out;
+		if (t1->position.z > t2->position.z) {
+			float diff = t2->position.z + m_RepeatDist - t1->position.z;
+			tout->position.z = glm::mod(t1->position.z + diff * amount, m_RepeatDist);
+		}
+	}
+
 }

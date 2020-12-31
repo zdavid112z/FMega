@@ -6,11 +6,11 @@
 
 namespace fmega {
 
-	const float Lamp::WallAngle = glm::radians(30.f);
+	const float Lamp::WallAngle = glm::radians(45.f);
 
 	Lamp::Lamp(const std::string& name, Entity* parent, FMegaScene* scene, int numLamps, float lampDistance, int index, float resetZ) :
 		FMegaEntity("Lamp_" + name, parent, scene), m_RepeatDistance(numLamps * lampDistance), m_ResetZ(resetZ) {
-		float sign = (index % 2) * 2 - 1;
+		float sign = float(index % 2) * 2.f - 1.f;
 		float z = resetZ - index * lampDistance;
 		float angle = glm::half_pi<float>() + sign * WallAngle;
 		float x = glm::cos(angle) * Tunnel::Radius;
@@ -58,6 +58,20 @@ namespace fmega {
 	byte* Lamp::GetData(uint& size) {
 		size = sizeof(m_Data);
 		return m_Data;
+	}
+
+	void Lamp::InterpolateDynamicData(float* p1, float* p2, float amount, float* out, int count) {
+		FMegaEntity::InterpolateDynamicData(p1, p2, amount, out, count);
+		Transform* t1 = (Transform*)p1;
+		Transform* t2 = (Transform*)p2;
+		Transform* tout = (Transform*)out;
+		if (t1->position.z > t2->position.z) {
+			float diff = m_ResetZ - t1->position.z + t2->position.z - (m_ResetZ - m_RepeatDistance);
+			tout->position.z = t1->position.z + diff * amount;
+			while (tout->position.z > m_ResetZ) {
+				tout->position.z -= m_RepeatDistance;
+			}
+		}
 	}
 
 }

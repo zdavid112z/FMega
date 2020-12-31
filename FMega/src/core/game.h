@@ -32,6 +32,7 @@ namespace fmega {
 		EventManager* GetEventManager() { return m_EventManager; }
 		void ChangeScene(SceneChangeSchedule schedule);
 		void DeleteCurrentScene();
+		void OnSceneRestarted();
 		virtual void InitNewScene();
 		float GetTime() { return m_Time; }
 	protected:

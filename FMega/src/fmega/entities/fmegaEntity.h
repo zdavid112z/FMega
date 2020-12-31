@@ -21,8 +21,11 @@ namespace fmega {
 
 		virtual byte* GetData(uint& size);
 		virtual uint GetSaveSize();
-		virtual void Save(byte* data, uint& size);
-		virtual void Load(byte* data, uint& size);
+		virtual uint GetStaticSaveSize();
+		virtual uint Save(byte* data);
+		virtual uint LoadStatic(byte* data);
+		virtual uint LoadDynamic(byte* data);
+		virtual void InterpolateDynamicData(float* p1, float* p2, float amount, float* out, int count);
 
 		CollisionObject* GetCollision() { return m_Collision; }
 	protected:
