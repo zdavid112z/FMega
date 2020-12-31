@@ -20,6 +20,7 @@ namespace fmega {
 
 		SlowDeath = false;
 		MoveSpeed = 15.f;
+		TargetZ = -15.f;
 
 		m_PlayerRadius = 0.5f;
 
@@ -172,6 +173,7 @@ namespace fmega {
 	void FMegaScene::Update(float delta)
 	{
 		if (m_RestartManager->ShouldRestart()) {
+			m_Renderer->SetShake(ShakeType::NONE);
 			Restart();
 			m_Game->OnSceneRestarted();
 			return;
@@ -182,11 +184,6 @@ namespace fmega {
 		m_Rewind->Update();
 		if (!m_Rewind->IsRewinding()) {
 			Scene::Update(adjDelta);
-			if (GetGame()->GetDisplay()->GetInput()->WasKeyPressed(Key::R)) {
-				if (m_Rewind->CanRewind()) {
-					m_Rewind->StartRewind();
-				}
-			}
 		}
 		else {
 			ForeachEntity([this, delta](Entity* ee) {
@@ -210,7 +207,9 @@ namespace fmega {
 		else {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		}
-		m_Renderer->SetShake(m_RestartManager->HasLost() && SlowDeath);
+		if (m_RestartManager->HasLost() && SlowDeath) {
+			m_Renderer->SetShake(ShakeType::BUILDUP);
+		}
 
 		float adjDelta = m_RestartManager->GetAdjDelta(delta);
 		m_Renderer->Prepare(adjDelta, m_Skybox->Offset);

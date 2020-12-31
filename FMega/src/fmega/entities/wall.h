@@ -19,6 +19,7 @@ namespace fmega {
 		virtual void Update(float delta) override;
 		virtual void Render(float delta) override;
 		virtual byte* GetData(uint& size) override;
+		virtual void OnHitByPlayer();
 
 		static const float Thickness;
 		static const float Height;
@@ -27,7 +28,7 @@ namespace fmega {
 			struct {
 				bool Broken;
 			};
-			byte Data[1];
+			byte Data[4];
 		};
 	private:
 		int m_JobID;

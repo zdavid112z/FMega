@@ -73,7 +73,7 @@ namespace fmega {
 	}
 
 	void FMegaEntity::InterpolateDynamicData(float* p1, float* p2, float amount, float* out, int count) {
-		for (uint i = 0; i < count; i++) {
+		for (int i = 0; i < count; i++) {
 			out[i] = glm::lerp(p1[i], p2[i], amount);
 		}
 	}

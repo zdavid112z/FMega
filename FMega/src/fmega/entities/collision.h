@@ -12,38 +12,37 @@ namespace fmega {
 
 	class CollisionObject {
 	public:
-		CollisionObject(CollisionObjectType type, Entity* parent) : Parent(parent), Type(type) {}
+		CollisionObject(CollisionObjectType type, Entity* parent, const glm::mat4& model) : Parent(parent), Type(type), Model(model) {}
 
 		glm::vec3 GetParentPosition();
+		glm::mat4 GetGlobalModel();
+		glm::vec3 GetPosition();
 
 		const Entity* Parent;
 		const CollisionObjectType Type;
+		const glm::mat4 Model;
 	};
 
 	class CircleObject : public CollisionObject {
 	public:
 		CircleObject(Entity* parent, const glm::mat4& model, float radius) :
-			CollisionObject(CollisionObjectType::CIRCLE, parent),
-			Radius(radius),
-			Model(model) {
+			CollisionObject(CollisionObjectType::CIRCLE, parent, model),
+			Radius(radius) {
 		}
 
 		const float Radius;
-		const glm::mat4 Model;
 	};
 
 	class AABBObject : public CollisionObject {
 	public:
 		AABBObject(Entity* parent, const glm::mat4& model, const glm::vec3& size) :
-			CollisionObject(CollisionObjectType::CIRCLE, parent),
-			Size(size),
-			Model(model) {
+			CollisionObject(CollisionObjectType::AABB, parent, model),
+			Size(size) {
 		}
 
 		std::pair<glm::vec3, glm::vec3> GetBounds();
 
 		const glm::vec3 Size;
-		const glm::mat4 Model;
 	};
 
 	class Collision {

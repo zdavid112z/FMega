@@ -71,6 +71,12 @@ namespace fmega {
 		INVALID,
 	};
 
+	enum class ShakeType {
+		NONE = 0,
+		DECAYING = 1,
+		BUILDUP = 2,
+	};
+
 	struct QueueKey {
 		bool ui = false;
 		bool transparent = false;
@@ -122,10 +128,10 @@ namespace fmega {
 		void RenderMesh(QueueKey key, MeshRenderData data);
 		void RenderDigit(Mesh* segment, MeshRenderData data, int digit);
 		void RenderAll();
-		void RenderPlatform(Mesh* mesh, const glm::mat4& model, const glm::vec4& color);
+		void RenderPlatform(Mesh* mesh, const glm::mat4& model, const glm::vec3& color, float destructZ);
 		void RenderPlayer(const glm::mat4& model, float height, float animTime);
 		void RenderSkybox();
-		void SetShake(bool shake);
+		void SetShake(ShakeType type, float duration = 0.f);
 
 	private:
 		void RenderMesh(QueueType::iterator&, bool bindShader);
@@ -133,7 +139,7 @@ namespace fmega {
 
 	public:
 		float m_ShakeTime;
-		bool m_Shake;
+		ShakeType m_ShakeType;
 		glm::mat4 m_ShakeMatrix = glm::mat4(1.f);
 		FMegaScene* m_Scene;
 		GPUBuffer* m_UIBuffer;

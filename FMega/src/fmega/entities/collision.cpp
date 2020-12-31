@@ -10,6 +10,16 @@ namespace fmega {
 		return glm::vec3(transform[3][0], transform[3][1], transform[3][2]);
 	}
 
+	glm::mat4 CollisionObject::GetGlobalModel() {
+		glm::mat4 transform = Parent->GetGlobalModel();
+		return transform * Model;
+	}
+
+	glm::vec3 CollisionObject::GetPosition() {
+		glm::mat4 transform = GetGlobalModel();
+		return glm::vec3(transform[3][0], transform[3][1], transform[3][2]);
+	}
+
 	std::pair<glm::vec3, glm::vec3> AABBObject::GetBounds() {
 		glm::vec3 center = GetParentPosition();
 		glm::vec3 halfSize = Size / 2.f;
@@ -55,8 +65,14 @@ namespace fmega {
 	}
 
 	bool Collision::TestCollisionAABBvsCircle(AABBObject* a, CircleObject* b) {
-		LOG_ERROR("Unimplemented collision between aabb and cirlce!");
-		return false;
+		glm::vec3 center(b->GetPosition());
+		glm::vec3 aabbHalfExtends = a->Size / 2.f;
+		glm::vec3 aabbCenter = a->GetPosition();
+		glm::vec3 diff = center - aabbCenter;
+		glm::vec3 clamped = glm::clamp(diff, -aabbHalfExtends, aabbHalfExtends);
+		glm::vec3 closest = aabbCenter + clamped;
+		diff = closest - center;
+		return glm::length2(diff) < b->Radius * b->Radius;
 	}
 
 }

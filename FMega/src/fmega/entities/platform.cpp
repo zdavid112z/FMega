@@ -8,12 +8,12 @@
 
 namespace fmega {
 
-	const float Platform::StartingZ = -30.f;
+	const float Platform::StartingZ = -80.f;
 	const float Platform::QualityPerUnit = 1.5f;
 	const float Platform::PlatformRandomness = 0.8f;
 	const float Platform::PlatformThickness = 0.5f;
 	const float Platform::PlatformColorRandomness = 0.1f;
-	const glm::vec2 Platform::PlatformXYRandomness = glm::vec2(8.f, 4.f);
+	const glm::vec2 Platform::PlatformXYRandomness = glm::vec2(30.f, 15.f);
 
 	Platform::Platform(const std::string& name, Entity* parent, FMegaScene* scene,
 		float x, float z, float width, float length, PlatformType type) :
@@ -74,7 +74,7 @@ namespace fmega {
 
 	void Platform::OnTouched() {
 		Type = PlatformType::ACTIVATED;
-		Color = Colors::ToRGBA(TypeToColor(Type));
+		Color = Colors::ToRGB(TypeToColor(Type));
 	}
 
 	hsv Platform::TypeToColor(PlatformType type) {
@@ -114,7 +114,7 @@ namespace fmega {
 		}
 
 		if (m_Mesh != nullptr) {
-			m_FMegaScene->GetRenderer()->RenderPlatform(m_Mesh, m_GlobalTransform, Color);
+			m_FMegaScene->GetRenderer()->RenderPlatform(m_Mesh, m_GlobalTransform, Color, 200.f);
 		}
 	}
 }

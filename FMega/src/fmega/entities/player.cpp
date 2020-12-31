@@ -7,14 +7,18 @@
 #include "utils/random.h"
 #include "fmega/gameOverEvent.h"
 #include "tunnel.h"
+#include "pickup.h"
+#include "wall.h"
 
 namespace fmega {
+
+	const float Player::PlayerZ = -4.f;
 
 	Player::Player(const std::string& name, Entity* parent, FMegaScene* scene, float radius) :
 		FMegaEntity(name, parent, scene),
 		m_Radius(radius),
 		m_MaxFuel(10.f),
-		m_Speeds( { 10.f, 15.f, 20.f, 25.f, 30.f } ),
+		m_Speeds({ 10.f, 15.f, 20.f, 25.f, 30.f }),
 		m_FuelBonusB(2.5f),
 		m_FuelGain(5.f),
 		m_FuelLoss(3.5f),
@@ -34,8 +38,17 @@ namespace fmega {
 		m_MaxSpeedColor(glm::vec4(1, 0, 0, 1)),
 		m_JumpVelocity(sqrt(2 * m_RiseGravity * m_JumpMaxHeight)),
 		m_OnLandHeightImpulse(4.f),
-		m_PlayerZ(-4.f),
-		m_NumLives(3)
+		m_NumLives(3),
+		m_DiscoTime(10.f),
+		m_FarsightTime(15.f),
+		m_MaxRewinds(3),
+		m_DiscoTimer(0.f),
+		m_FarsightTimer(0.f),
+		m_NumRewinds(0),
+		m_NearsightTargetZ(-15.f),
+		m_FarsightTargetZ(-40.f),
+		m_SightSpeed(0.25f),
+		m_RenderTargetZ(-15.f)
 	{
 		m_CameraIndex = 0;
 		m_Fuel = m_MaxFuel;
@@ -47,7 +60,7 @@ namespace fmega {
 		m_Height = 1.f;
 		m_CurrentGravity = m_FallGravity;
 		
-		m_LocalTransform.position = glm::vec3(0, 2.f, m_PlayerZ);
+		m_LocalTransform.position = glm::vec3(0, 2.f, PlayerZ);
 		m_HeightK1 = 20.f;
 		m_HeightK2 = 0.4f;
 		m_HeightK3 = 30.f;
@@ -66,6 +79,9 @@ namespace fmega {
 		m_BottomY = 5.f;
 
 		m_AnimSpeed = 3.f;
+
+		CircleObject* col = new CircleObject(this, glm::mat4(1), m_Radius);
+		Init(col);
 
 		constexpr float fov = glm::radians(90.f);
 		m_Cameras[0] = new FPCamera(m_FMegaScene, this, fov);
@@ -117,7 +133,8 @@ namespace fmega {
 			m_BottomY = glm::max(0.f, m_BottomY);
 		}
 
-		HandlePlatformCollision();
+		HandleGameCollisions();
+		UpdateEffects(delta);
 		HandleLostAnimation(delta);
 
 		CalcHeight(delta);
@@ -126,6 +143,17 @@ namespace fmega {
 		m_LocalTransform.position.y = m_BottomY + m_Radius * m_Height;
 
 		m_Cameras[m_CameraIndex]->Update(delta);
+	}
+
+	void Player::UpdateEffects(float delta) {
+		m_FarsightTimer = glm::max(m_FarsightTimer - delta, 0.f);
+		if (m_FarsightTimer > 0) {
+			m_CurrentTargetZ = m_FarsightTargetZ;
+		}
+		else {
+			m_CurrentTargetZ = m_NearsightTargetZ;
+		}
+		m_RenderTargetZ = glm::lerp(m_RenderTargetZ, m_CurrentTargetZ, delta * m_SightSpeed);
 	}
 
 	void Player::CalcHeight(float delta) {
@@ -178,6 +206,7 @@ namespace fmega {
 	void Player::UpdateSceneSpeed() {
 		float speed = m_Speeds[m_SpeedIndex];
 		m_FMegaScene->MoveSpeed = speed;
+		m_FMegaScene->TargetZ = m_RenderTargetZ;
 	}
 
 	void Player::HandleInput(float delta) {
@@ -299,6 +328,11 @@ namespace fmega {
 	}
 
 	void Player::Die(float isSlow) {
+		if (m_NumRewinds > 0 && m_FMegaScene->GetRewind()->CanRewind()) {
+			m_NumRewinds--;
+			m_FMegaScene->GetRewind()->StartRewind();
+			return;
+		}
 		if (m_Lost) {
 			return;
 		}
@@ -317,32 +351,82 @@ namespace fmega {
 		}
 	}
 
-	void Player::HandlePlatformCollision() {
-		if (m_Lost || m_BottomY > 0 || m_ForceOnTop) {
+	void Player::HandlePickup(Pickup* p) {
+		if (!Collision::TestCollision(GetCollision(), p->GetCollision())) {
+			return;
+		}
+		switch (p->Type)
+		{
+		case PickupType::DISCO:
+			m_DiscoTimer = m_DiscoTime;
+			break;
+		case PickupType::REWIND:
+			m_NumRewinds = glm::min(m_NumRewinds + 1, m_MaxRewinds);
+			break;
+		case PickupType::FARSIGHT:
+			m_FarsightTimer = m_FarsightTime;
+			break;
+		default:
+			break;
+		}
+		p->Destroy();
+	}
+
+	bool Player::CheckCollidesWith(Wall* w) {
+		if (w->Broken || !Collision::TestCollision(GetCollision(), w->GetCollision())) {
+			return false;
+		}
+		w->OnHitByPlayer();
+		return true;
+	}
+
+	void Player::HandleGameCollisions() {
+		if (m_Lost || m_ForceOnTop) {
 			return;
 		}
 
 		bool wasGrounded = m_Grounded;
+		bool hitWall = false;
 		m_Grounded = false;
-		m_FMegaScene->ForeachEntity([this](Entity* e) {
+		m_FMegaScene->ForeachEntity([this, &hitWall](Entity* e) {
 			if (StringUtils::StartsWith(e->GetName(), "Platform_")) {
 				Platform* p = (Platform*)e;
-				if (IsOnTopOf(p)) {
+				if (m_BottomY <= 0 && IsOnTopOf(p)) {
 					OnLandOnPlatform(p);
 				}
 			}
+			else if (StringUtils::StartsWith(e->GetName(), "Pickup_")) {
+				Pickup* p = (Pickup*)e;
+				HandlePickup(p);
+			}
+			else if (StringUtils::StartsWith(e->GetName(), "Wall_")) {
+				Wall* w = (Wall*)e;
+				hitWall |= CheckCollidesWith(w);
+			}
 		});
-		if (!m_Grounded) {
-			Die(false);
-		}
-		else {
-			if (m_Fuel <= 0) {
-				Die(true);
+
+		if (hitWall) {
+			if (m_SpeedIndex >= int(m_Speeds.size()) - 1) {
+				m_FMegaScene->GetRenderer()->SetShake(ShakeType::DECAYING, 0.3f);
 			}
 			else {
-				m_VelocityY = 0;
-				if (!wasGrounded)
-					m_HeightImpulse = m_OnLandHeightImpulse;
+				Die(true);
+			}
+		}
+
+		if (m_BottomY <= 0) {
+			if (!m_Grounded) {
+				Die(false);
+			}
+			else {
+				if (m_Fuel <= 0) {
+					Die(true);
+				}
+				else {
+					m_VelocityY = 0;
+					if (!wasGrounded)
+						m_HeightImpulse = m_OnLandHeightImpulse;
+				}
 			}
 		}
 	}

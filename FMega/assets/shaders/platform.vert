@@ -97,13 +97,19 @@ vec3 rotate(vec4 q, vec3 v) {
 void main()
 {
 	float currentZ = (uModel * aLocalOrigin).z;
+    float destructZ = uColor.w;
 	float amount;
     if (currentZ >= uTargetZ) {
-        amount = 0;
+        if (currentZ <= destructZ) {
+            amount = 0;
+        }
+        else {
+            amount = (currentZ - destructZ) / (35.0 - destructZ);
+        }
     } else {
         amount = (currentZ - uTargetZ) / (aInitialPosition.z - uTargetZ);
     }
-    float p = 1.5;
+    float p = 1.0;
     if (amount < 1.0) {
         amount = pow(amount, p);
     } else {
@@ -125,7 +131,7 @@ void main()
     vData.vPosition = globalRotatedPosition.xyz;
 	vData.vUV = aUV.xy;
 	vData.vTBN = mat3(globalTangent, globalBitangent, globalNormal);
-	vData.vColor = uColor + aColor;
+	vData.vColor = vec4(uColor.rgb, 1.0) + aColor;
 	vData.vTexOpacity = 0.8;
 
     vData.vRoughness = 0.2;

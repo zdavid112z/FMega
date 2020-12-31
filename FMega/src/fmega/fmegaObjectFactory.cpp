@@ -139,7 +139,7 @@ namespace fmega {
 			}
 		}
 
-		for (auto it : posToId) {
+		for (const auto& it : posToId) {
 			vertices[it.second].normal = glm::normalize(vertices[it.second].normal);
 		}
 	}

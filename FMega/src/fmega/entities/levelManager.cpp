@@ -87,7 +87,8 @@ namespace fmega {
 		Wall* w = new Wall(std::to_string(m_PlatformId++), nullptr, m_FMegaScene, x, z, width);
 		m_FMegaScene->AddEntity(w);
 
-		Pickup* p = new Pickup(std::to_string(m_PlatformId++), nullptr, m_FMegaScene, glm::vec3(x, Wall::Height + Pickup::Height, z - Wall::Thickness / 2.f));
+		PickupType pt = PickupType(Random::NextInt(0, int(PickupType::COUNT)));
+		Pickup* p = new Pickup(std::to_string(m_PlatformId++), nullptr, m_FMegaScene, glm::vec3(x, Wall::Height + Pickup::Height, z - Wall::Thickness / 2.f), pt);
 		m_FMegaScene->AddEntity(p);
 	}
 

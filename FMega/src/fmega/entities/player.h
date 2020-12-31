@@ -7,6 +7,8 @@
 namespace fmega {
 
 	class Platform;
+	class Pickup;
+	class Wall;
 
 	class Player : public FMegaEntity {
 	public:
@@ -21,9 +23,12 @@ namespace fmega {
 
 		glm::vec2 GetMinMaxSpeed();
 		bool IsSlowDying();
+
+		const static float PlayerZ;
+
 	private:
 		void Die(float isSlow);
-		void HandlePlatformCollision();
+		void HandleGameCollisions();
 		void HandleTunnelCollision();
 		void HandleLostAnimation(float delta);
 		void CalcHeight(float delta);
@@ -33,6 +38,9 @@ namespace fmega {
 		bool IsOnTopOf(Platform* p);
 		void HandleCollision(Platform* p, float delta);
 		void UpdateSceneSpeed();
+		void HandlePickup(Pickup* p);
+		bool CheckCollidesWith(Wall* w);
+		void UpdateEffects(float delta);
 
 		GameCamera* m_Cameras[2];
 
@@ -63,6 +71,13 @@ namespace fmega {
 				float m_CurrentGravity;
 				float m_VelocityY;
 				float m_BottomY;
+
+				float m_DiscoTimer;
+				float m_FarsightTimer;
+				int m_NumRewinds;
+
+				float m_RenderTargetZ;
+				float m_CurrentTargetZ;
 			};
 			byte m_Data[100];
 		};
@@ -95,9 +110,16 @@ namespace fmega {
 		const float m_JumpVelocity;
 
 		const float m_MoveSpeed;
-		const float m_PlayerZ;
 		const float m_Radius;
 		const float m_RotationSpeed;
+
+		const float m_DiscoTime;
+		const float m_FarsightTime;
+		const int m_MaxRewinds;
+
+		const float m_NearsightTargetZ;
+		const float m_FarsightTargetZ;
+		const float m_SightSpeed;
 	};
 
 }

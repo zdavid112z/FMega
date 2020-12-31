@@ -38,7 +38,7 @@ namespace fmega {
 		union {
 			struct {
 				PlatformType Type;
-				glm::vec4 Color;
+				glm::vec3 Color;
 			};
 			byte Data[20];
 		};

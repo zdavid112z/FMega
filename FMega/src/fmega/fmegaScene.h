@@ -46,6 +46,7 @@ namespace fmega {
 		Mesh* SphereMesh;
 		Mesh* PickupMesh;
 		float MoveSpeed;
+		float TargetZ;
 		Camera* UICamera;
 		bool SlowDeath;
 	protected:

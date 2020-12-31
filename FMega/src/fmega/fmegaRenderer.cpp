@@ -26,7 +26,7 @@ namespace fmega {
 		uibuffer.viewProjection = scene->UICamera->viewProjection;
 		m_UIBuffer->SetSubdata((byte*)&uibuffer, sizeof(UIBuffer), 0);
 
-		m_Shake = false;
+		m_ShakeType = ShakeType::NONE;
 		m_ShakeTime = 0;
 	}
 
@@ -177,20 +177,48 @@ namespace fmega {
 		}
 	}
 
-	void FMegaRenderer::SetShake(bool shake) {
-		if (shake != m_Shake) {
-			m_ShakeTime = 0;
+	void FMegaRenderer::SetShake(ShakeType type, float duration) {
+		if (int(type) <= int(m_ShakeType) && type != ShakeType::NONE) {
+			return;
 		}
-		m_Shake = shake;
+		if (m_ShakeType != ShakeType::DECAYING || type != ShakeType::BUILDUP) {
+			switch (type)
+			{
+			case ShakeType::NONE:
+			case ShakeType::BUILDUP:
+				m_ShakeTime = 0;
+				break;
+			case ShakeType::DECAYING:
+				m_ShakeTime = duration;
+				break;
+			default:
+				break;
+			}
+		}
+		m_ShakeType = type;
 	}
 
 	void FMegaRenderer::Prepare(float delta, float skyboxOffset)
 	{
 		SceneBuffer bufferData;
-		bufferData.targetZ = -15.f;
+		bufferData.targetZ = m_Scene->TargetZ;
 		glm::mat4 view = m_Scene->GetCamera()->view;
-		if (m_Shake) {
+		switch (m_ShakeType)
+		{
+		case ShakeType::NONE:
+		case ShakeType::DECAYING:
+			m_ShakeTime = glm::max(0.f, m_ShakeTime - delta);
+			break;
+		case ShakeType::BUILDUP:
 			m_ShakeTime += delta;
+			break;
+		default:
+			break;
+		}
+		if (m_ShakeTime == 0) {
+			m_ShakeType = ShakeType::NONE;
+		}
+		if (m_ShakeType != ShakeType::NONE) {
 			float angle1 = Random::NextFloat(glm::vec2(0, glm::two_pi<float>()));
 			float angle2 = Random::NextFloat(glm::vec2(0, glm::two_pi<float>()));
 			float amount = m_ShakeTime * 1.f + 0.1f;
@@ -248,7 +276,7 @@ namespace fmega {
 		m_DynamicSceneBuffer->SetSubdata((byte*)&bufferData, sizeof(bufferData), 0);
 	}
 
-	void FMegaRenderer::RenderPlatform(Mesh* mesh, const glm::mat4& model, const glm::vec4& color) {
+	void FMegaRenderer::RenderPlatform(Mesh* mesh, const glm::mat4& model, const glm::vec3& color, float destructZ) {
 		glm::vec3 pos = glm::vec3(model * glm::vec4(0, 0, 0, 1));
 		if (pos.z < -85.f) {
 			return;
@@ -258,7 +286,7 @@ namespace fmega {
 		m_PlatformShader->Bind();
 		DynamicPlatformBuffer buffer;
 		buffer.model = model;
-		buffer.color = color;
+		buffer.color = glm::vec4(color, destructZ);
 		m_PlatformShader->SetDynamicObjectBuffer("DynamicObjectBuffer", (byte*)&buffer);
 		m_PlatformShader->SetBuffer("DynamicSceneBuffer", m_DynamicSceneBuffer);
 

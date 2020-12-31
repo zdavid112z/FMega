@@ -12,10 +12,15 @@ namespace fmega {
 		static std::string ToString(float val) { return std::to_string(val); }
 		static std::string ToString(double val) { return std::to_string(val); }
 		static std::string ToString(long double val) { return std::to_string(val); }
-		static std::string ToString(int32 val) { return std::to_string(val); }
-		static std::string ToString(uint32 val) { return std::to_string(val); }
-		static std::string ToString(int64 val) { return std::to_string(val); }
-		static std::string ToString(uint64 val) { return std::to_string(val); }
+		static std::string ToString(byte val) { return std::to_string((int)val); }
+		static std::string ToString(short val) { return std::to_string(val); }
+		static std::string ToString(unsigned short val) { return std::to_string(val); }
+		static std::string ToString(int val) { return std::to_string(val); }
+		static std::string ToString(unsigned int val) { return std::to_string(val); }
+		static std::string ToString(long val) { return std::to_string(val); }
+		static std::string ToString(unsigned long val) { return std::to_string(val); }
+		static std::string ToString(long long val) { return std::to_string(val); }
+		static std::string ToString(unsigned long long val) { return std::to_string(val); }
 		static std::string ToString(const glm::vec2& v) { return "(" + std::to_string(v.x) + ", " + std::to_string(v.y) + ")"; }
 		static std::string ToString(const glm::vec3& v) { return "(" + std::to_string(v.x) + ", " + std::to_string(v.y) + ", " + std::to_string(v.z) + ")"; }
 		static std::string ToString(const glm::vec4& v) { return "(" + std::to_string(v.x) + ", " + std::to_string(v.y) + ", " + std::to_string(v.z) + ", " + std::to_string(v.w) + ")"; }

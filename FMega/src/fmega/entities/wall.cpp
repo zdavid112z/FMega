@@ -4,6 +4,7 @@
 #include "../fmegaScene.h"
 #include "../fmegaRenderer.h"
 #include "../fmegaObjectFactory.h"
+#include "player.h"
 
 namespace fmega {
 
@@ -47,6 +48,9 @@ namespace fmega {
 
 		m_JobID = m_FMegaScene->GetPlatformManager()->SubmitPlatform(data);
 
+		AABBObject* col = new AABBObject(this, glm::translate(glm::mat4(1), glm::vec3(0, -Height / 2.f, Thickness / 2.f)), glm::vec3(width, Height, Thickness));
+		Init(col);
+
 		m_LocalTransform.position = glm::vec3(x, Height, z);
 	}
 
@@ -76,6 +80,10 @@ namespace fmega {
 		}
 	}
 
+	void Wall::OnHitByPlayer() {
+		Broken = true;
+	}
+
 	void Wall::Render(float delta) {
 		if (m_Mesh == nullptr && m_FMegaScene->GetPlatformManager()->IsDone(m_JobID)) {
 			m_VBO->Unmap();
@@ -84,7 +92,7 @@ namespace fmega {
 		}
 
 		if (m_Mesh != nullptr) {
-			m_FMegaScene->GetRenderer()->RenderPlatform(m_Mesh, m_GlobalTransform, glm::vec4(0.4, 0.5, 0.7, 1.0));
+			m_FMegaScene->GetRenderer()->RenderPlatform(m_Mesh, m_GlobalTransform, glm::vec3(0.4, 0.5, 0.7), Broken ? Player::PlayerZ : 200.f);
 		}
 	}
 

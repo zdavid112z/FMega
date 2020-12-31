@@ -99,14 +99,14 @@ namespace fmega {
 	float RewindManager::GetTargetTime() {
 		float t = m_Scene->GetGame()->GetTime();
 		float recDuration = m_MaxTime - m_MinTime;
-		float x = (t - m_RewindStartTime) / recDuration + 0.01f;
+		float x = (t - m_RewindStartTime) / recDuration;
 		if (x < 1) {
 			float s = glm::sign(x - 0.5f);
 			float o = (s + 1.f) * 0.5f;
-			float k = 1.f + 4.f * x;
+			float k = 2.f + 3.f * x;
 			x = o - s * 0.5f * glm::pow(2 * (o - s * x), k);
 		}
-		return m_RewindStartTime - x * recDuration;
+		return m_RewindStartTime - x * recDuration - (m_RewindStartTime - m_MaxTime);
 	}
 
 	bool RewindManager::Rewind() {
@@ -131,11 +131,11 @@ namespace fmega {
 				best = idx;
 				bestDiff = diff;
 			}
-			if (t < target && bestEarlierTime < t) {
+			if (t <= target && bestEarlierTime <= t) {
 				bestEarlierTime = t;
 				bestEarlier = idx;
 			}
-			if (t > target && bestLaterTime > t) {
+			if (t >= target && bestLaterTime >= t) {
 				bestLaterTime = t;
 				bestLater = idx;
 			}
@@ -163,6 +163,11 @@ namespace fmega {
 		if (!hasLater) {
 			amount = 0.f;
 		}
+		if (bestLater == bestEarlier) {
+			amount = 0.5f;
+		}
+		//LOG_INFO();
+		//LOG_INFO(m_MinTime, "   ", m_MaxTime, "   ", m_RewindStartTime, "   ", target, "   ", bestEarlierTime, "   ", bestEarlier, "   ", bestLaterTime, "   ", bestLater);
 		m_Scene->ForeachEntity([this, &frame, &earlier, &later, amount, target](Entity* ee) {
 			FMegaEntity* e = (FMegaEntity*)ee;
 
