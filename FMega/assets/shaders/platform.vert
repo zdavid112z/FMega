@@ -35,7 +35,7 @@ layout(std140) uniform DynamicObjectBuffer
 out VertexData
 {
     vec3 vPosition;
-	vec2 vUV;
+	vec3 vUV;
 	float vTexOpacity;
 	mat3 vTBN;
 	vec4 vColor;
@@ -129,7 +129,7 @@ void main()
     vec3 globalBitangent = cross(globalNormal, globalTangent);
 
     vData.vPosition = globalRotatedPosition.xyz;
-	vData.vUV = aUV.xy;
+	vData.vUV = vec3(aUV.xy, 0.0);
 	vData.vTBN = mat3(globalTangent, globalBitangent, globalNormal);
 	vData.vColor = vec4(uColor.rgb, 1.0) + aColor;
 	vData.vTexOpacity = 0.8;

@@ -17,6 +17,10 @@ namespace fmega {
 			ColorVertex(glm::vec3(1, 1, 0), color),
 			ColorVertex(glm::vec3(-1, 1, 0), color),
 		};
+		vertices[0].uv = glm::vec4(0, 1, 0, 0);
+		vertices[1].uv = glm::vec4(1, 1, 0, 0);
+		vertices[2].uv = glm::vec4(1, 0, 0, 0);
+		vertices[3].uv = glm::vec4(0, 0, 0, 0);
 
 		std::vector<uint32> indices = {
 			0, 1, 2,

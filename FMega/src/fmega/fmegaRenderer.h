@@ -6,8 +6,8 @@
 #include "graphics/gpuBuffer.h"
 #include "fmegaObjectFactory.h"
 
-#define NUM_POINT_LIGHTS 16
-#define NUM_SPOT_LIGHTS  16
+#define NUM_POINT_LIGHTS 24
+#define NUM_SPOT_LIGHTS  24
 
 namespace fmega {
 
@@ -100,6 +100,7 @@ namespace fmega {
 			if (mesh != k.mesh) {
 				return mesh < k.mesh;
 			}
+			
 			if (albedo != k.albedo) {
 				return albedo < k.albedo;
 			}
@@ -112,30 +113,37 @@ namespace fmega {
 			if (metalness != k.metalness) {
 				return metalness < k.metalness;
 			}
+
 			return false;
 		}
 	};
 
+	struct QueueValue {
+		std::vector<MeshRenderData> data;
+		std::vector<Texture2D*> textures;
+	};
+
 	class FMegaRenderer {
 	public:
-		using QueueType = std::map<QueueKey, std::vector<MeshRenderData>>;
+		using QueueType = std::map<QueueKey, QueueValue>;
 
 		FMegaRenderer(FMegaScene* scene, float playerRadius);
 		~FMegaRenderer();
 
 		void Prepare(float delta, float skyboxOffset);
 		void RenderMesh(Mesh* mesh, MeshRenderData data, bool isUI = false, MeshType type = MeshType::MESH_2D, bool isTransparent = false);
+		void RenderMesh2D(Mesh* mesh, MeshRenderData data, bool isUI = false, bool isTransparent = false, Texture2D* texture = nullptr);
 		void RenderMesh(QueueKey key, MeshRenderData data);
 		void RenderDigit(Mesh* segment, MeshRenderData data, int digit);
 		void RenderAll();
 		void RenderPlatform(Mesh* mesh, const glm::mat4& model, const glm::vec3& color, float destructZ);
-		void RenderPlayer(const glm::mat4& model, float height, float animTime);
+		void RenderPlayer(const glm::mat4& model, float height, float animTime, bool useDiscoTextures);
 		void RenderSkybox();
 		void SetShake(ShakeType type, float duration = 0.f);
 
 	private:
 		void RenderMesh(QueueType::iterator&, bool bindShader);
-		void BindShaderAndTextures(QueueKey key);
+		void BindShaderAndTextures(QueueKey key, QueueValue& val);
 
 	public:
 		float m_ShakeTime;

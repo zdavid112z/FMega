@@ -18,6 +18,7 @@ namespace fmega {
 		~RewindManager();
 
 		void Update();
+		void Render(float delta);
 		bool CanRewind();
 		bool IsRewinding();
 		void StartRewind();
@@ -44,6 +45,12 @@ namespace fmega {
 		FMegaScene* m_Scene;
 		int m_FPS;
 		float m_RecDuration;
+
+		const float m_TimePerFrame;
+		float m_CurrentFrameTime;
+		int m_CurrentFrame;
+		int m_Direction;
+		int m_NumFrames;
 	};
 
 }

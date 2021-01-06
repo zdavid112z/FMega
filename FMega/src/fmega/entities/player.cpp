@@ -442,7 +442,7 @@ namespace fmega {
 			data.color = m_FuelColor;
 			data.opacity = 1.f;
 			data.albedoStrength = 0.f;
-			m_FMegaScene->GetRenderer()->RenderMesh(m_FMegaScene->BoxMesh, data, true);
+			m_FMegaScene->GetRenderer()->RenderMesh(m_FMegaScene->GetAssets()->BoxMesh, data, true);
 		}
 
 		{
@@ -452,7 +452,7 @@ namespace fmega {
 			data.color = m_FuelEmptyColor;
 			data.opacity = 1.f;
 			data.albedoStrength = 0.f;
-			m_FMegaScene->GetRenderer()->RenderMesh(m_FMegaScene->BoxMesh, data, true);
+			m_FMegaScene->GetRenderer()->RenderMesh(m_FMegaScene->GetAssets()->BoxMesh, data, true);
 		}
 
 		if (m_MaxSpeedTimer > 0) {
@@ -462,10 +462,10 @@ namespace fmega {
 			data.color = glm::vec4(glm::sin(m_MaxSpeedFlicker * m_FMegaScene->GetGame()->GetTime()) * 0.3f + 0.7f, 0.2f, 0.2f, 1.0f);
 			data.opacity = 1.f;
 			data.albedoStrength = 0.f;
-			m_FMegaScene->GetRenderer()->RenderMesh(m_FMegaScene->BoxMesh, data, true);
+			m_FMegaScene->GetRenderer()->RenderMesh(m_FMegaScene->GetAssets()->BoxMesh, data, true);
 		}
 
 		if (m_CameraIndex != 0) // FP Camera
-			m_FMegaScene->GetRenderer()->RenderPlayer(m_GlobalTransform, m_Height, m_AnimTime);
+			m_FMegaScene->GetRenderer()->RenderPlayer(m_GlobalTransform, m_Height, m_AnimTime, false);
 	}
 }

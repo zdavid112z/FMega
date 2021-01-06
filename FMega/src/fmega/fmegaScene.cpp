@@ -28,31 +28,9 @@ namespace fmega {
 		UICamera = new Camera();
 		UICamera->viewProjection = glm::ortho(-16.f, 16.f, -9.f, 9.f, -1000.f, 1000.f);
 
-		/*PlatformAlbedo = new Texture2D("assets/textures/floor_tiles_06_diff_1k_metal.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
-		PlatformNormalmap = new Texture2D("assets/textures/floor_tiles_06_nor_1k2.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
-		PlatformRoughness = new Texture2D("assets/textures/floor_tiles_06_metal2.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
-		PlatformMetalness = new Texture2D("assets/textures/floor_tiles_06_metal2.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);*/
+		m_Assets = new FMegaAssets();
+		m_Assets->LoadAll();
 
-		PlatformAlbedo = new Texture2D("assets/textures/MetalPlates001_1K_Color.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
-		PlatformNormalmap = new Texture2D("assets/textures/MetalPlates001_1K_Normal.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
-		PlatformRoughness = new Texture2D("assets/textures/MetalPlates001_1K_Roughness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
-		PlatformMetalness = new Texture2D("assets/textures/MetalPlates001_1K_Metalness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
-
-		/*TunnelAlbedo = new Texture2D("assets/textures/Concrete_wall_02_1K_Base_Color.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
-		TunnelNormalmap = new Texture2D("assets/textures/Concrete_wall_02_1K_Normal.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
-		TunnelRoughness = new Texture2D("assets/textures/Concrete_wall_02_1K_Roughness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);*/
-
-		TunnelAlbedo = new Texture2D("assets/textures/MetalPlates008_1K_Color.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
-		TunnelNormalmap = new Texture2D("assets/textures/MetalPlates008_1K_Normal.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
-		TunnelRoughness = new Texture2D("assets/textures/MetalPlates008_1K_Roughness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
-		TunnelMetalness = new Texture2D("assets/textures/MetalPlates008_1K_Metalness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
-
-		LampMesh = FMegaObjectFactory::GenLamp(4);
-		TunnelMesh = FMegaObjectFactory::GenTunnel(1);
-		BoxMesh = FMegaObjectFactory::GenBox(1024);
-		SegmentMesh = FMegaObjectFactory::GenSegment(64);
-		SphereMesh = FMegaObjectFactory::GenSphere(1);
-		PickupMesh = FMegaObjectFactory::GenPickup(128);
 		m_Renderer = new FMegaRenderer(this, m_PlayerRadius);
 		m_Rewind = new RewindManager(this, 30, 4.f);
 
@@ -109,9 +87,9 @@ namespace fmega {
 		mainLight4->GetLocalTransform().position = glm::vec3(-5, -5, 2);
 		AddEntity(mainLight4);*/
 
-		int numLamps = 16;
-		float lampDist = 25.f;
-		float lampResetZ = 80;
+		int numLamps = 12;
+		float lampDist = 30.f;
+		float lampResetZ = 50;
 		for (int i = 0; i < numLamps; i++) {
 			glm::vec3 m = glm::vec3(1);
 			if (i % 3 == 0) {
@@ -138,24 +116,10 @@ namespace fmega {
 			delete m_PlatformManager;
 		}
 
-		delete TunnelAlbedo;
-		delete TunnelRoughness;
-		delete TunnelNormalmap;
-		delete TunnelMetalness;
-
-		delete PlatformAlbedo;
-		delete PlatformNormalmap;
-		delete PlatformRoughness;
-		delete PlatformMetalness;
-
-		delete LampMesh;
-		delete TunnelMesh;
-		delete PickupMesh;
+		m_Assets->DestroyAll();
+		delete m_Assets;
 		delete m_Rewind;
 		delete m_RestartManager;
-		delete SphereMesh;
-		delete BoxMesh;
-		delete SegmentMesh;
 		delete m_Renderer;
 		delete UICamera;
 	}
@@ -200,6 +164,7 @@ namespace fmega {
 		glDepthMask(GL_TRUE);
 		glEnable(GL_CULL_FACE);
 		glClearColor(0.1f, 0.15f, 0.3f, 1);
+		m_Assets->UpdateLazyAssets();
 		bool noClearColor = m_RestartManager->HasLost() && SlowDeath;
 		if (noClearColor) {
 			glClear(GL_DEPTH_BUFFER_BIT);
@@ -219,6 +184,7 @@ namespace fmega {
 		Scene::Render(adjDelta);
 		m_Renderer->RenderAll();
 		m_RestartManager->Render(delta);
+		m_Rewind->Render(delta);
 		m_Renderer->RenderAll();
 
 		m_PlatformManager->Update(delta);

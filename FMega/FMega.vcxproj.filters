@@ -228,6 +228,9 @@
     <ClInclude Include="src\fmega\entities\lamp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\fmega\fmegaAssets.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -368,6 +371,9 @@
     <ClCompile Include="src\fmega\entities\lamp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\fmega\fmegaAssets.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\platform.vert" />
@@ -382,5 +388,6 @@
     <None Include="assets\shaders\simple3d.frag" />
     <None Include="assets\shaders\light.glsl" />
     <None Include="assets\shaders\common.glsl" />
+    <None Include="assets\shaders\pbr.frag" />
   </ItemGroup>
 </Project>

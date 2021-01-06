@@ -1,3 +1,6 @@
+#ifndef FMEGA_LIGHT_GLSL
+#define FMEGA_LIGHT_GLSL
+
 const float PI = 3.14159265359;
 
 struct PointLight {
@@ -100,3 +103,5 @@ vec3 CalcSpotLight(vec3 pos, vec3 V, vec3 N, vec3 F0, vec3 albedo, float metal, 
 float CalcFogAmount(vec3 pos, vec2 fogLimits) {
     return smoothstep(fogLimits.x, fogLimits.y, pos.z);
 }
+
+#endif

@@ -48,7 +48,7 @@ namespace fmega {
 		d.metalness = 0.1f;
 		d.metalnessmapStrength = 0.f;
 		QueueKey k;
-		k.mesh = m_FMegaScene->LampMesh;
+		k.mesh = m_FMegaScene->GetAssets()->LampMesh;
 		k.transparent = false;
 		k.ui = false;
 		k.type = MeshType::MESH_3D;

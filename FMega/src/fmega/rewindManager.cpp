@@ -2,10 +2,12 @@
 #include "rewindManager.h"
 #include "fmegaScene.h"
 #include "core/game.h"
+#include "fmegaRenderer.h"
 
 namespace fmega {
 
-	RewindManager::RewindManager(FMegaScene* scene, int recordFPS, float recordDuration) {
+	RewindManager::RewindManager(FMegaScene* scene, int recordFPS, float recordDuration) :
+		m_TimePerFrame(1.f / 30.f) {
 		m_Scene = scene;
 		m_FPS = recordFPS;
 		m_RecDuration = recordDuration;
@@ -19,6 +21,11 @@ namespace fmega {
 		m_MaxTime = 0;
 		m_Rewinding = false;
 		m_RewindStartTime = 0;
+
+		m_CurrentFrame = 0;
+		m_Direction = 1;
+		m_NumFrames = 0;
+		m_CurrentFrameTime = 0;
 	}
 
 	RewindManager::~RewindManager() {
@@ -36,6 +43,27 @@ namespace fmega {
 		else {
 			Record();
 		}
+	}
+
+	void RewindManager::Render(float delta) {
+		if (!m_Rewinding || m_NumFrames == 0) {
+			return;
+		}
+		m_CurrentFrameTime += delta;
+		while (m_CurrentFrameTime > m_TimePerFrame) {
+			m_CurrentFrameTime -= m_TimePerFrame;
+			m_CurrentFrame += m_Direction;
+			if (m_CurrentFrame < 0 || m_CurrentFrame >= m_NumFrames) {
+				m_Direction = -m_Direction;
+				m_CurrentFrame += m_Direction * 2;
+				m_CurrentFrame = glm::clamp(m_CurrentFrame, 0, m_NumFrames - 1);
+			}
+		}
+		MeshRenderData d;
+		d.model = glm::scale(glm::mat4(1), glm::vec3(16, 9, 1));
+		d.albedoStrength = 1;
+		m_Scene->GetRenderer()->RenderMesh2D(m_Scene->GetAssets()->BoxMesh, d, true, true,
+			m_Scene->GetAssets()->RewindTextures[m_CurrentFrame]);
 	}
 
 	void RewindManager::DeleteInvalidEntities() {
@@ -94,6 +122,10 @@ namespace fmega {
 	void RewindManager::StartRewind() {
 		m_Rewinding = true;
 		m_RewindStartTime = m_Scene->GetGame()->GetTime();
+		m_CurrentFrame = 0;
+		m_Direction = 1;
+		m_NumFrames = m_Scene->GetAssets()->NumRewindTexturesLoaded;
+		m_CurrentFrameTime = 0.f;
 	}
 
 	float RewindManager::GetTargetTime() {

@@ -62,7 +62,7 @@ namespace fmega {
 		d.roughnessmapStrength = 0.f;
 		d.metalness = 0.01f;
 		QueueKey q;
-		q.mesh = m_FMegaScene->PickupMesh;
+		q.mesh = m_FMegaScene->GetAssets()->PickupMesh;
 		q.ui = false;
 		q.transparent = true;
 		q.type = MeshType::MESH_3D;

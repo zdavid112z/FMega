@@ -23,11 +23,17 @@ layout(std140) uniform UIBuffer
 out VertexData
 {
 	vec4 vColor;
+	vec2 vUV;
+	float vTextureStrength;
+	flat int vTexture;
 } vData;
 
 void main()
 {
-    gl_Position = uViewProjection * aModel * vec4(aPosition.xyz, 1.0);	
+    gl_Position = uViewProjection * aModel * vec4(aPosition.xyz, 1.0);
 	vec4 color = vec4(mix(aColor.rgb, aObjectColor.rgb, aObjectColor.a), aColor.a * aOpacity.r);
 	vData.vColor = color;
+	vData.vUV = aUV.xy;
+	vData.vTextureStrength = aOpacity.g;
+	vData.vTexture = int(aOpacity.b + 0.5);
 }

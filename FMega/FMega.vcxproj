@@ -128,6 +128,7 @@
     <ClInclude Include="src\fmega\cameras\tpCamera.h" />
     <ClInclude Include="src\fmega\entities\tunnel.h" />
     <ClInclude Include="src\fmega\entities\wall.h" />
+    <ClInclude Include="src\fmega\fmegaAssets.h" />
     <ClInclude Include="src\fmega\gameOverEvent.h" />
     <ClInclude Include="src\fmega\platformManager.h" />
     <ClInclude Include="src\fmega\restartManager.h" />
@@ -199,6 +200,7 @@
     <ClCompile Include="src\fmega\cameras\tpCamera.cpp" />
     <ClCompile Include="src\fmega\entities\tunnel.cpp" />
     <ClCompile Include="src\fmega\entities\wall.cpp" />
+    <ClCompile Include="src\fmega\fmegaAssets.cpp" />
     <ClCompile Include="src\fmega\platformManager.cpp" />
     <ClCompile Include="src\fmega\restartManager.cpp" />
     <ClCompile Include="src\fmega\entities\skybox.cpp" />
@@ -233,6 +235,7 @@
   <ItemGroup>
     <None Include="assets\shaders\common.glsl" />
     <None Include="assets\shaders\light.glsl" />
+    <None Include="assets\shaders\pbr.frag" />
     <None Include="assets\shaders\platform.frag" />
     <None Include="assets\shaders\platform.vert" />
     <None Include="assets\shaders\player.frag" />

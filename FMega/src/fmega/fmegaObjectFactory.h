@@ -16,7 +16,10 @@ namespace fmega {
 
 		float opacity = 1.f;
 		float albedoStrength = 0.f;
-		float roughness = 0.3f;
+		union {
+			float roughness = 0.3f;
+			float textureID;
+		};
 		float roughnessmapStrength = 0.f;
 
 		float metalness = 0.3f;

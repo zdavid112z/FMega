@@ -42,9 +42,17 @@ layout(std140) uniform StaticBuffer
 
 out VertexData
 {
-    vec3 vNormal;
+    vec3 vPosition;
+	vec3 vUV;
+	float vTexOpacity;
+	mat3 vTBN;
 	vec4 vColor;
-	vec3 vSphereCoord;
+	float vRoughness;
+	float vRoughnessMapStrength;
+	float vMetalness;
+	float vMetalMapStrength;
+	vec3 vInstNormal;
+	float vNormalMapStrength;
 } vData;
 
 void main()
@@ -64,8 +72,24 @@ void main()
 	vec4 globalPosition = uModel * position;
     gl_Position = uViewProjection * globalPosition;
 
-	vec4 normal = vec4(aNormal.x * abc.y * abc.z, aNormal.y * abc.x * abc.z, aNormal.z * abc.x * abc.y, 0.0);
-    vData.vNormal = (uModel * normal).xyz;
-    vData.vColor = aColor;
-	vData.vSphereCoord = aPosition.xyz;
+	vec4 normal = normalize(vec4(aNormal.x * abc.y * abc.z, aNormal.y * abc.x * abc.z, aNormal.z * abc.x * abc.y, 0.0));
+	vec4 tangent = normalize(vec4(aTangent.x * abc.y * abc.z, aTangent.y * abc.x * abc.z, aTangent.z * abc.x * abc.y, 0.0));
+	vec3 globalNormal = (uModel * normal).xyz;
+	vec3 globalTangent = (uModel * tangent).xyz;
+	globalTangent = normalize(globalTangent - dot(globalTangent, globalNormal) * globalNormal);
+    vec3 globalBitangent = cross(globalNormal, globalTangent);
+	
+	vec4 color = vec4(mix(aColor.rgb, aObjectColor.rgb, aObjectColor.a), aColor.a * aOpacity.x);
+
+	vData.vPosition = globalPosition.xyz;
+	vData.vUV = normalize(vec3(-aPosition.xyz));
+	vData.vTBN = mat3(globalTangent, globalBitangent, globalNormal);
+	vData.vColor = vec4(0, 0, 0, 1);
+	vData.vTexOpacity = 1.0;
+	vData.vRoughness = 0.2;
+	vData.vRoughnessMapStrength = 1.0;
+	vData.vMetalness = 0.2;
+	vData.vMetalMapStrength = 1.0;
+	vData.vInstNormal = vec3(0, 0, 1);
+	vData.vNormalMapStrength = 1.0;
 }

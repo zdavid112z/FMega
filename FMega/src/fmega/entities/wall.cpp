@@ -48,7 +48,7 @@ namespace fmega {
 
 		m_JobID = m_FMegaScene->GetPlatformManager()->SubmitPlatform(data);
 
-		AABBObject* col = new AABBObject(this, glm::translate(glm::mat4(1), glm::vec3(0, -Height / 2.f, Thickness / 2.f)), glm::vec3(width, Height, Thickness));
+		AABBObject* col = new AABBObject(this, glm::translate(glm::mat4(1), glm::vec3(0, -Height / 2.f, -Thickness / 2.f)), glm::vec3(width, Height, Thickness));
 		Init(col);
 
 		m_LocalTransform.position = glm::vec3(x, Height, z);

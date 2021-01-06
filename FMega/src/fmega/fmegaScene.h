@@ -10,6 +10,7 @@
 #include "platformManager.h"
 #include "rewindManager.h"
 #include "graphics/texture2d.h"
+#include "fmegaAssets.h"
 
 namespace fmega {
 
@@ -28,23 +29,8 @@ namespace fmega {
 		FMegaRenderer* GetRenderer() { return m_Renderer; }
 		PlatformManager* GetPlatformManager() { return m_PlatformManager; }
 		RewindManager* GetRewind() { return m_Rewind; }
+		FMegaAssets* GetAssets() { return m_Assets; }
 
-		Texture2D* TunnelAlbedo;
-		Texture2D* TunnelNormalmap;
-		Texture2D* TunnelRoughness;
-		Texture2D* TunnelMetalness;
-
-		Texture2D* PlatformAlbedo;
-		Texture2D* PlatformNormalmap;
-		Texture2D* PlatformRoughness;
-		Texture2D* PlatformMetalness;
-
-		Mesh* TunnelMesh;
-		Mesh* LampMesh;
-		Mesh* BoxMesh;
-		Mesh* SegmentMesh;
-		Mesh* SphereMesh;
-		Mesh* PickupMesh;
 		float MoveSpeed;
 		float TargetZ;
 		Camera* UICamera;
@@ -58,6 +44,7 @@ namespace fmega {
 		PlatformManager* m_PlatformManager;
 		Skybox* m_Skybox = nullptr;
 		RewindManager* m_Rewind;
+		FMegaAssets* m_Assets;
 	};
 
 }

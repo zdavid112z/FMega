@@ -60,11 +60,51 @@ namespace fmega {
 		}
 		auto it = q.find(key);
 		if (it == q.end()) {
-			q[key] = { data };
+			QueueValue v;
+			v.data = { data };
+			q[key] = v;
 			it = q.find(key);
 		}
 		else {
-			it->second.push_back(data);
+			it->second.data.push_back(data);
+		}
+	}
+
+	void FMegaRenderer::RenderMesh2D(Mesh* mesh, MeshRenderData data, bool isUI, bool isTransparent, Texture2D* texture) {
+		QueueKey key;
+		key.mesh = mesh;
+		key.ui = isUI;
+		key.transparent = isTransparent;
+		key.type = MeshType::MESH_2D;
+		QueueType& q = m_Queue;
+		if (!isUI) {
+			data.model = m_ShakeMatrix * data.model;
+		}
+
+		auto it = q.find(key);
+		
+		if (it == q.end()) {
+			QueueValue v;
+			data.textureID = 0;
+			v.data = { data };
+			if (texture != nullptr)
+				v.textures.push_back(texture);
+			q[key] = v;
+			it = q.find(key);
+		}
+		else {
+			if (texture == nullptr) {
+				data.textureID = 0;
+			}
+			else {
+				auto& textures = it->second.textures;
+				auto itt = std::find(textures.begin(), textures.end(), texture);
+				data.textureID = itt - textures.begin();
+				if (itt == it->second.textures.end()) {
+					textures.push_back(texture);
+				}
+			}
+			it->second.data.push_back(data);
 		}
 	}
 
@@ -73,31 +113,34 @@ namespace fmega {
 		MeshType prevType = MeshType::INVALID;
 
 		for (auto it = m_Queue.begin(); it != m_Queue.end(); it++) {
-			BindShaderAndTextures(it->first);
+			BindShaderAndTextures(it->first, it->second);
 			RenderMesh(it, false);
 		}
 	}
 
-	void FMegaRenderer::BindShaderAndTextures(QueueKey key) {
+	void FMegaRenderer::BindShaderAndTextures(QueueKey key, QueueValue& val) {
 		int i = int(key.type);
 		m_Shaders[i]->Bind();
 		if (key.type == MeshType::MESH_2D) {
 			m_Shaders[i]->SetBuffer("UIBuffer", m_UIBuffer);
+			for (int j = 0; j < (int)val.textures.size(); j++) {
+				m_Shaders[i]->SetTexture("uTextures[" + StringUtils::ToString(j) + "]", val.textures[j]);
+			}
 		}
 		else if (key.type == MeshType::MESH_3D) {
 			m_Shaders[i]->SetBuffer("DynamicSceneBuffer", m_DynamicSceneBuffer);
-		}
-		if (key.albedo) {
-			m_Shaders[i]->SetTexture("uAlbedoMap", key.albedo);
-		}
-		if (key.normal) {
-			m_Shaders[i]->SetTexture("uNormalMap", key.normal);
-		}
-		if (key.roughness) {
-			m_Shaders[i]->SetTexture("uRoughnessMap", key.roughness);
-		}
-		if (key.metalness) {
-			m_Shaders[i]->SetTexture("uMetalnessMap", key.metalness);
+			if (key.albedo) {
+				m_Shaders[i]->SetTexture("uAlbedoMap", key.albedo);
+			}
+			if (key.normal) {
+				m_Shaders[i]->SetTexture("uNormalMap", key.normal);
+			}
+			if (key.roughness) {
+				m_Shaders[i]->SetTexture("uRoughnessMap", key.roughness);
+			}
+			if (key.metalness) {
+				m_Shaders[i]->SetTexture("uMetalnessMap", key.metalness);
+			}
 		}
 	}
 
@@ -112,27 +155,28 @@ namespace fmega {
 		auto& key = it->first;
 		auto& data = it->second;
 
-		if (data.empty()) {
+		if (data.data.empty()) {
 			return;
 		}
 
 		if (bindShader) {
-			BindShaderAndTextures(key);
+			BindShaderAndTextures(key, data);
 		}
 
 		int batchSize = it->first.mesh->GetVBO(1)->GetSize() / sizeof(MeshRenderData);
-		int remainingMeshes = it->second.size();
-		int numBatches = (it->second.size() + batchSize - 1) / batchSize;
+		int remainingMeshes = it->second.data.size();
+		int numBatches = (it->second.data.size() + batchSize - 1) / batchSize;
 		for (int i = 0; i < numBatches; i++) {
 			int currentStart = i * batchSize;
 			int currentSize = glm::min(batchSize, remainingMeshes);
 			remainingMeshes -= currentSize;
 
-			key.mesh->GetVBO(1)->SetSubdata((byte*)(&data[currentStart]), currentSize * sizeof(MeshRenderData), 0);
+			key.mesh->GetVBO(1)->SetSubdata((byte*)(&data.data[currentStart]), currentSize * sizeof(MeshRenderData), 0);
 			key.mesh->DrawNow(currentSize);
 		}
 
-		data.clear();
+		data.data.clear();
+		data.textures.clear();
 	}
 
 	void FMegaRenderer::RenderDigit(Mesh* segment, MeshRenderData data, int digit) {
@@ -257,7 +301,8 @@ namespace fmega {
 
 		for (int i = 0; i < NUM_POINT_LIGHTS; i++) {
 			if (i >= (int)pointLights.size()) {
-				bufferData.pointLights[i].color = glm::vec4(0);
+				memset(&bufferData.pointLights[i], 0, sizeof(PointLight));
+				bufferData.pointLights[i].atten.x = 1.f;
 			}
 			else {
 				bufferData.pointLights[i] = pointLights[i];
@@ -266,7 +311,8 @@ namespace fmega {
 
 		for (int i = 0; i < NUM_SPOT_LIGHTS; i++) {
 			if (i >= (int)spotLights.size()) {
-				bufferData.spotLights[i].color = glm::vec4(0);
+				memset(&bufferData.spotLights[i], 0, sizeof(SpotLight));
+				bufferData.spotLights[i].atten.x = 1.f;
 			}
 			else {
 				bufferData.spotLights[i] = spotLights[i];
@@ -290,10 +336,10 @@ namespace fmega {
 		m_PlatformShader->SetDynamicObjectBuffer("DynamicObjectBuffer", (byte*)&buffer);
 		m_PlatformShader->SetBuffer("DynamicSceneBuffer", m_DynamicSceneBuffer);
 
-		m_PlatformShader->SetTexture("uAlbedoMap", m_Scene->PlatformAlbedo);
-		m_PlatformShader->SetTexture("uNormalMap", m_Scene->PlatformNormalmap);
-		m_PlatformShader->SetTexture("uRoughnessMap", m_Scene->PlatformRoughness);
-		m_PlatformShader->SetTexture("uMetalnessMap", m_Scene->PlatformMetalness);
+		m_PlatformShader->SetTexture("uAlbedoMap", m_Scene->GetAssets()->PlatformAlbedo);
+		m_PlatformShader->SetTexture("uNormalMap", m_Scene->GetAssets()->PlatformNormalmap);
+		m_PlatformShader->SetTexture("uRoughnessMap", m_Scene->GetAssets()->PlatformRoughness);
+		m_PlatformShader->SetTexture("uMetalnessMap", m_Scene->GetAssets()->PlatformMetalness);
 
 		mesh->DrawNow();
 		glDisable(GL_BLEND);
@@ -303,11 +349,11 @@ namespace fmega {
 		glDepthMask(GL_FALSE);
 		m_SkyboxShader->Bind();
 		m_SkyboxShader->SetBuffer("DynamicSceneBuffer", m_DynamicSceneBuffer);
-		m_Scene->BoxMesh->DrawNow();
+		m_Scene->GetAssets()->BoxMesh->DrawNow();
 		glDepthMask(GL_TRUE);
 	}
 
-	void FMegaRenderer::RenderPlayer(const glm::mat4& model, float height, float animTime) {
+	void FMegaRenderer::RenderPlayer(const glm::mat4& model, float height, float animTime, bool useDiscoTextures) {
 		m_PlayerShader->Bind();
 		DynamicPlayerBuffer buffer;
 		buffer.model = model;
@@ -316,7 +362,19 @@ namespace fmega {
 		m_PlayerShader->SetDynamicObjectBuffer("DynamicObjectBuffer", (byte*)&buffer);
 		m_PlayerShader->SetBuffer("DynamicSceneBuffer", m_DynamicSceneBuffer);
 		m_PlayerShader->SetBuffer("StaticBuffer", m_StaticPlayerBuffer);
-		m_Scene->SphereMesh->DrawNow();
+		if (useDiscoTextures) {
+			m_PlayerShader->SetTexture("uAlbedoMap", m_Scene->GetAssets()->DiscoAlbedo);
+			m_PlayerShader->SetTexture("uNormalMap", m_Scene->GetAssets()->DiscoNormalmap);
+			m_PlayerShader->SetTexture("uRoughnessMap", m_Scene->GetAssets()->DiscoRoughness);
+			m_PlayerShader->SetTexture("uMetalnessMap", m_Scene->GetAssets()->DiscoMetalness);
+		}
+		else {
+			m_PlayerShader->SetTexture("uAlbedoMap", m_Scene->GetAssets()->PlayerAlbedo);
+			m_PlayerShader->SetTexture("uNormalMap", m_Scene->GetAssets()->PlayerNormalmap);
+			m_PlayerShader->SetTexture("uRoughnessMap", m_Scene->GetAssets()->PlayerRoughness);
+			m_PlayerShader->SetTexture("uMetalnessMap", m_Scene->GetAssets()->PlayerMetalness);
+		}
+		m_Scene->GetAssets()->SphereMesh->DrawNow();
 	}
 
 }

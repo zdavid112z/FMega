@@ -31,7 +31,7 @@ layout(std140) uniform DynamicSceneBuffer
 out VertexData
 {
     vec3 vPosition;
-	vec2 vUV;
+	vec3 vUV;
 	float vTexOpacity;
 	mat3 vTBN;
 	vec4 vColor;
@@ -52,7 +52,7 @@ void main()
 	vec4 color = vec4(mix(aColor.rgb, aObjectColor.rgb, aObjectColor.a), aColor.a * aOpacity.x);
 	gl_Position = uViewProjection * worldPos;
 	vData.vPosition = worldPos.xyz;
-	vData.vUV = aUV.xy;
+	vData.vUV = vec3(aUV.xy, 0.0);
 	vData.vTBN = mat3(worldTangent, worldBitangent, worldNormal);
 	vData.vColor = color;
 	vData.vTexOpacity = aOpacity.y;

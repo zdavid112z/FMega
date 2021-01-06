@@ -40,14 +40,14 @@ namespace fmega {
 		d.metalness = 0.1f;
 		d.metalnessmapStrength = 1.f;
 		QueueKey k;
-		k.mesh = m_FMegaScene->TunnelMesh;
+		k.mesh = m_FMegaScene->GetAssets()->TunnelMesh;
 		k.transparent = false;
 		k.ui = false;
 		k.type = MeshType::MESH_3D;
-		k.albedo = m_FMegaScene->TunnelAlbedo;
-		k.normal = m_FMegaScene->TunnelNormalmap;
-		k.roughness = m_FMegaScene->TunnelRoughness;
-		k.metalness = m_FMegaScene->TunnelMetalness;
+		k.albedo = m_FMegaScene->GetAssets()->TunnelAlbedo;
+		k.normal = m_FMegaScene->GetAssets()->TunnelNormalmap;
+		k.roughness = m_FMegaScene->GetAssets()->TunnelRoughness;
+		k.metalness = m_FMegaScene->GetAssets()->TunnelMetalness;
 		m_FMegaScene->GetRenderer()->RenderMesh(k, d);
 	}
 
