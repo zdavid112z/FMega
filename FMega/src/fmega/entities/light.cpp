@@ -8,21 +8,30 @@ namespace fmega {
 	Light::Light(const std::string& name, Entity* parent, FMegaScene* scene, const glm::vec3& color, float intensity, const glm::vec3& atten) :
 		FMegaEntity("Light_" + name, parent, scene) {
 
+		Init(color, intensity, atten);
+	}
+
+	Light::Light(const std::string& name, Entity* parent, FMegaScene* scene, const glm::vec3& color, float intensity, const glm::vec3& atten, const glm::vec3& direction, const glm::vec2& cutoffCos) :
+		FMegaEntity("Light_" + name, parent, scene) {
+
+		Init(color, intensity, atten, direction, cutoffCos);
+	}
+
+	void Light::Init(const glm::vec3& color, float intensity, const glm::vec3& atten) {
 		m_Type = LightType::POINT;
 		m_Color = color;
 		m_Atten = atten;
 		m_Intensity = intensity;
 	}
 
-	Light::Light(const std::string& name, Entity* parent, FMegaScene* scene, const glm::vec3& color, float intensity, const glm::vec3& atten, const glm::vec3& direction, const glm::vec2& cutoffAnglesDeg) :
-		FMegaEntity("Light_" + name, parent, scene) {
-
+	void Light::Init(const glm::vec3& color, float intensity, const glm::vec3& atten, const glm::vec3& direction, const glm::vec2& cutoffCos) {
 		m_Type = LightType::SPOT;
 		m_Color = color;
 		m_Atten = atten;
 		m_Intensity = intensity;
 		m_Direction = glm::normalize(direction);
-		m_CutoffLimits = glm::cos(glm::radians(cutoffAnglesDeg));
+		//m_CutoffLimits = glm::cos(glm::radians(cutoffAnglesDeg));
+		m_CutoffLimits = cutoffCos;
 	}
 
 	Light::~Light() {

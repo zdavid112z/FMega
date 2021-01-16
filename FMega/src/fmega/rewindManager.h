@@ -27,6 +27,7 @@ namespace fmega {
 	private:
 		void Record();
 		float GetTargetTime();
+		float GetTargetAmount();
 		bool Rewind();
 		void DeleteInvalidEntities();
 
@@ -46,10 +47,6 @@ namespace fmega {
 		int m_FPS;
 		float m_RecDuration;
 
-		const float m_TimePerFrame;
-		float m_CurrentFrameTime;
-		int m_CurrentFrame;
-		int m_Direction;
 		int m_NumFrames;
 	};
 

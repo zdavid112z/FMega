@@ -231,6 +231,12 @@
     <ClInclude Include="src\fmega\fmegaAssets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\fmega\entities\discoLight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fmega\entities\bars.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -372,6 +378,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\fmega\fmegaAssets.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fmega\entities\discoLight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fmega\entities\bars.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

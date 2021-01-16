@@ -117,7 +117,7 @@ void main()
     }
     vec4 currentQuat = slerp(vec4(0, 0, 0, 1), aInitialRotation, amount);
 	vec4 localRotatedPosition = vec4(rotate(currentQuat, aPosition.xyz), 1);
-    vec4 globalRotatedPosition = uModel * (vec4(aLocalOrigin.xyz, 0.0)+ localRotatedPosition);
+    vec4 globalRotatedPosition = uModel * (vec4(aLocalOrigin.xyz, 0.0) + localRotatedPosition);
     globalRotatedPosition.xy += aInitialPosition.xy * amount;
     gl_Position = uViewProjection * globalRotatedPosition;
 

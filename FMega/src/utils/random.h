@@ -16,7 +16,9 @@ namespace fmega {
 		static float NextFloat(const glm::vec2& range);
 		static glm::vec2 NextVec2();
 		static glm::vec3 NextVec3();
+		static glm::vec3 NextVec3Normalized();
 		static glm::vec4 NextVec4();
+		static glm::quat NextQuat();
 
 		template <typename T>
 		static void Shuffle(std::vector<T>& v)

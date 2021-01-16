@@ -11,6 +11,7 @@
 #include "entities/light.h"
 #include "entities/tunnel.h"
 #include "entities/lamp.h"
+#include "entities/bars.h"
 
 namespace fmega {
 
@@ -36,7 +37,6 @@ namespace fmega {
 
 		EventListener l;
 		l.function = [this](Event e) {
-			// TODO: check if player has rewind
 			GameOverEventData* data = (GameOverEventData*)e.data;
 			SlowDeath = data->isSlow;
 			m_RestartManager->OnPlayerLost(data->isSlow);
@@ -50,6 +50,7 @@ namespace fmega {
 	}
 
 	void FMegaScene::Restart() {
+		m_Rewind->DeleteHistory();
 		SlowDeath = false;
 		for (auto e : m_Entities) {
 			delete e;
@@ -61,8 +62,6 @@ namespace fmega {
 		}
 		m_PlatformManager = new PlatformManager();
 
-		m_Skybox = new Skybox("Skybox", nullptr, this);
-		AddEntity(m_Skybox);
 		AddEntity(new Tunnel("Tunnel", nullptr, this));
 		AddEntity(new LevelManager("Manager", nullptr, this));
 		Player* player = new Player("Player", nullptr, this, m_PlayerRadius);
@@ -97,12 +96,13 @@ namespace fmega {
 			}
 			Lamp* lamp = new Lamp(std::to_string(i), nullptr, this, numLamps, lampDist, i, lampResetZ);
 			AddEntity(lamp);
-			Light* light = new Light("Lamp" + std::to_string(i), lamp, this, glm::vec3(1, 1, 1.4) * m, 20.f, glm::vec3(1.f, 0.f, 0.f), glm::vec3(-1, 0, 0), glm::vec2(45, 60));
+			Light* light = new Light("Lamp" + std::to_string(i), lamp, this, glm::vec3(1, 1, 1.4) * m, 20.f, glm::vec3(1.f, 0.f, 0.f), glm::vec3(-1, 0, 0), glm::cos(glm::radians(glm::vec2(45, 60))));
 			AddEntity(light);
 			Light* lightp = new Light("Point" + std::to_string(i), lamp, this, glm::vec3(1, 1, 1.8) * m, 100.f, glm::vec3(1.f, 0.6f, 0.3f));
 			lightp->GetLocalTransform().position.x = -1.5f;
 			AddEntity(lightp);
 		}
+		AddEntity(new Bars("Bars", nullptr, this));
 	}
 
 	FMegaScene::~FMegaScene()
@@ -163,7 +163,7 @@ namespace fmega {
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 		glEnable(GL_CULL_FACE);
-		glClearColor(0.1f, 0.15f, 0.3f, 1);
+		glClearColor(1.f, 1.f, 1.f, 1.f);
 		m_Assets->UpdateLazyAssets();
 		bool noClearColor = m_RestartManager->HasLost() && SlowDeath;
 		if (noClearColor) {
@@ -177,9 +177,9 @@ namespace fmega {
 		}
 
 		float adjDelta = m_RestartManager->GetAdjDelta(delta);
-		m_Renderer->Prepare(adjDelta, m_Skybox->Offset);
+		m_Renderer->Prepare(adjDelta);
 		if (!noClearColor) {
-			m_Skybox->SkyboxRender(adjDelta);
+			glClearColor(1.f, 1.f, 1.f, 1.f);
 		}
 		Scene::Render(adjDelta);
 		m_Renderer->RenderAll();

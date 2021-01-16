@@ -20,7 +20,10 @@ namespace fmega {
 			float roughness = 0.3f;
 			float textureID;
 		};
-		float roughnessmapStrength = 0.f;
+		union {
+			float roughnessmapStrength = 0.f;
+			float use3DCamera;
+		};
 
 		float metalness = 0.3f;
 		float metalnessmapStrength = 0.f;
@@ -95,6 +98,8 @@ namespace fmega {
 		static Mesh* GenPickup(uint32 numInstances);
 		static Mesh* GenTunnel(uint32 numInstances);
 		static Mesh* GenLamp(uint32 numInstances);
+		static Mesh* GenBars(uint32 numInstances);
+		
 		static void GenPlatformMeshData(
 			PlatformVertex* vertices,
 			uint32* indices,
@@ -136,6 +141,17 @@ namespace fmega {
 			const glm::vec3& center,
 			float radius,
 			int quality);
+		static void GenCylinder(
+			std::vector<ColorVertex>& vertices,
+			std::vector<uint32>& indices,
+			const glm::vec4& color,
+			const glm::vec3& center,
+			float radius,
+			int xyQuality,
+			float minLength,
+			float uvScale,
+			int axis, // 0 = x, 1 = y, 2 = z
+			bool normalsInwards);
 		static void GenSmoothCube(
 			std::vector<ColorVertex>& vertices,
 			std::vector<uint32>& indices,
@@ -165,7 +181,8 @@ namespace fmega {
 			std::vector<ColorVertex>& vertices,
 			std::vector<uint32>& indices,
 			int v0, int v1, int v2,
-			bool isOutward, bool addNormal = true);
+			bool isOutward, bool addNormal = true,
+			const glm::vec3& objCenter = glm::vec3(0));
 		static void GenTangents(
 			ColorVertex* vertices,
 			uint32 numVertices,

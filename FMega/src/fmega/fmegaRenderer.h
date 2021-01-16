@@ -57,6 +57,7 @@ namespace fmega {
 
 	struct UIBuffer {
 		glm::mat4 viewProjection;
+		glm::mat4 viewProjection3d;
 	};
 
 	struct StaticPlayerBuffer {
@@ -130,7 +131,7 @@ namespace fmega {
 		FMegaRenderer(FMegaScene* scene, float playerRadius);
 		~FMegaRenderer();
 
-		void Prepare(float delta, float skyboxOffset);
+		void Prepare(float delta);
 		void RenderMesh(Mesh* mesh, MeshRenderData data, bool isUI = false, MeshType type = MeshType::MESH_2D, bool isTransparent = false);
 		void RenderMesh2D(Mesh* mesh, MeshRenderData data, bool isUI = false, bool isTransparent = false, Texture2D* texture = nullptr);
 		void RenderMesh(QueueKey key, MeshRenderData data);
@@ -140,12 +141,14 @@ namespace fmega {
 		void RenderPlayer(const glm::mat4& model, float height, float animTime, bool useDiscoTextures);
 		void RenderSkybox();
 		void SetShake(ShakeType type, float duration = 0.f);
+		void SetDrawUI(bool);
 
 	private:
 		void RenderMesh(QueueType::iterator&, bool bindShader);
 		void BindShaderAndTextures(QueueKey key, QueueValue& val);
 
 	public:
+		bool m_DrawUI = true;
 		float m_ShakeTime;
 		ShakeType m_ShakeType;
 		glm::mat4 m_ShakeMatrix = glm::mat4(1.f);

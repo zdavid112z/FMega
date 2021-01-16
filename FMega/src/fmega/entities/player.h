@@ -23,8 +23,10 @@ namespace fmega {
 
 		glm::vec2 GetMinMaxSpeed();
 		bool IsSlowDying();
+		float GetDiscoLightIntensity();
 
 		const static float PlayerZ;
+		const float Radius;
 
 	private:
 		void Die(float isSlow);
@@ -41,13 +43,12 @@ namespace fmega {
 		void HandlePickup(Pickup* p);
 		bool CheckCollidesWith(Wall* w);
 		void UpdateEffects(float delta);
+		void DrawUI();
 
 		GameCamera* m_Cameras[2];
 
 		union {
 			struct {
-				int m_NumLives;
-
 				float m_Fuel;
 				int m_SpeedIndex;
 				float m_MaxSpeedTimer;
@@ -74,14 +75,17 @@ namespace fmega {
 
 				float m_DiscoTimer;
 				float m_FarsightTimer;
-				int m_NumRewinds;
 
 				float m_RenderTargetZ;
 				float m_CurrentTargetZ;
+
+				int m_Score;
+				float m_DiscoAngle;
 			};
-			byte m_Data[100];
+			byte m_Data[200];
 		};
 
+		int m_NumRewinds;
 		int m_CameraIndex;
 
 		const std::vector<float> m_Speeds;
@@ -110,7 +114,6 @@ namespace fmega {
 		const float m_JumpVelocity;
 
 		const float m_MoveSpeed;
-		const float m_Radius;
 		const float m_RotationSpeed;
 
 		const float m_DiscoTime;
@@ -120,6 +123,10 @@ namespace fmega {
 		const float m_NearsightTargetZ;
 		const float m_FarsightTargetZ;
 		const float m_SightSpeed;
+
+		const int m_ScoreWallbreak;
+		const int m_ScorePickup;
+		const int m_ScoreDiscoBonus;
 	};
 
 }

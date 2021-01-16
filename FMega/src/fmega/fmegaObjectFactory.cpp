@@ -47,12 +47,75 @@ namespace fmega {
 		int xyQuality = 30;
 		float minLength = 1000;
 		float uvScale = 5.f;
+		glm::vec4 color(0.f, 0.f, 0.f, 1.f);
+		glm::vec3 center(0);
+
+		GenCylinder(vertices, indices, color, center, r, xyQuality, minLength, uvScale, 2, true);
+		GenTangents(vertices.data(), vertices.size(), indices.data(), indices.size());
+
+		return GenObject(vertices, indices, PrimitiveType::TRIANGLES, numInstances);
+	}
+
+	Mesh* FMegaObjectFactory::GenBars(uint32 numInstances) {
+		std::vector<ColorVertex> vertices;
+		std::vector<uint32> indices;
+
+		float radius = 0.15f;
+		int xyQuality = 8;
+		float uvScale = 1.f;
+		glm::vec4 color(0.f, 0.f, 0.f, 1.f);
+		float minVertLength = Tunnel::Radius;
+		float minHorLength = Tunnel::Radius * 2.01;
+
+		int numVertBars = 25;
+		int numHorBars = 13;
 
 		float angleStep = glm::two_pi<float>() / xyQuality;
-		float quadSize = r * sqrt(2 - 2 * glm::cos(angleStep));
+		float quadSize = radius * sqrt(2 - 2 * glm::cos(angleStep));
+		int zQualityHor = int(glm::ceil(minHorLength / quadSize)) + 1;
+		int zQualityVert = int(glm::ceil(minVertLength / quadSize)) + 1;
+		float lengthHor = (zQualityHor - 1) * quadSize;
+		float lengthVert = (zQualityVert - 1) * quadSize;
+
+		for (int i = 0; i < numVertBars; i++) {
+			float amount = float(i) / float(numVertBars - 1);
+			GenCylinder(vertices, indices, color, 
+				glm::vec3(amount * lengthHor - lengthHor / 2.f , 0, 0), 
+				radius, xyQuality, minVertLength, uvScale, 1, false);
+		}
+
+		for (int i = 0; i < numHorBars; i++) {
+			float amount = float(i) / float(numHorBars - 1);
+			GenCylinder(vertices, indices, color, 
+				glm::vec3(0, amount * lengthVert - lengthVert / 2.f, 0),
+				radius, xyQuality, minHorLength, uvScale, 0, false);
+		}
+
+		GenTangents(vertices.data(), vertices.size(), indices.data(), indices.size());
+
+		return GenObject(vertices, indices, PrimitiveType::TRIANGLES, numInstances);
+	}
+
+	void FMegaObjectFactory::GenCylinder(
+		std::vector<ColorVertex>& vertices,
+		std::vector<uint32>& indices,
+		const glm::vec4& color,
+		const glm::vec3& center,
+		float radius,
+		int xyQuality,
+		float minLength,
+		float uvScale,
+		int axis,
+		bool normalsInwards) {
+
+		int indStart = vertices.size();
+
+		float angleStep = glm::two_pi<float>() / xyQuality;
+		float quadSize = radius * sqrt(2 - 2 * glm::cos(angleStep));
 		int zQuality = int(glm::ceil(minLength / quadSize)) + 1;
 		float length = (zQuality - 1) * quadSize;
 		float length2 = length * 0.5f;
+		float normalModifier = normalsInwards ? -1 : 1;
 
 		for (int i = 0; i < zQuality; i++) {
 			float amountZ = float(i) / xyQuality;
@@ -62,13 +125,22 @@ namespace fmega {
 				float theta = amountXY * glm::two_pi<float>();
 				float c = glm::cos(theta);
 				float s = glm::sin(theta);
-				glm::vec3 p = glm::vec3(r * c, r * s, z);
+				glm::vec3 p = glm::vec3(radius * c, radius * s, z) + center;
+				glm::vec3 n = glm::vec3(c, s, 0) * normalModifier;
+				if (axis == 0) {
+					std::swap(p.x, p.z);
+					std::swap(n.x, n.z);
+				}
+				else if (axis == 1) {
+					std::swap(p.y, p.z);
+					std::swap(n.y, n.z);
+				}
 
 				ColorVertex v;
 				v.position = glm::vec4(p, 1.f);
-				v.color = glm::vec4(0.f, 0.f, 0.f, 1.f);
+				v.color = color;
 				v.uv = glm::vec4(amountXY * uvScale, amountZ * uvScale, 0.f, 0.f);
-				v.normal = glm::vec4(-c, -s, 0, 0);
+				v.normal = glm::vec4(n, 0.f);
 				v.tangent = glm::vec4(0);
 				vertices.push_back(v);
 			}
@@ -77,19 +149,16 @@ namespace fmega {
 		for (int i = 0; i < zQuality - 1; i++) {
 			for (int j = 0; j < xyQuality; j++) {
 				int inds[] = {
-					(j + 0) + (i + 0) * (xyQuality + 1),
-					(j + 0) + (i + 1) * (xyQuality + 1),
-					(j + 1) + (i + 0) * (xyQuality + 1),
-					(j + 1) + (i + 1) * (xyQuality + 1),
+					indStart + (j + 0) + (i + 0) * (xyQuality + 1),
+					indStart + (j + 0) + (i + 1) * (xyQuality + 1),
+					indStart + (j + 1) + (i + 0) * (xyQuality + 1),
+					indStart + (j + 1) + (i + 1) * (xyQuality + 1),
 				};
-				GenFace(vertices, indices, inds[0], inds[1], inds[2], false, false);
-				GenFace(vertices, indices, inds[1], inds[2], inds[3], false, false);
+				GenFace(vertices, indices, inds[0], inds[1], inds[2], !normalsInwards, false, center);
+				GenFace(vertices, indices, inds[1], inds[2], inds[3], !normalsInwards, false, center);
 			}
 		}
 
-		GenTangents(vertices.data(), vertices.size(), indices.data(), indices.size());
-
-		return GenObject(vertices, indices, PrimitiveType::TRIANGLES, numInstances);
 	}
 
 	void FMegaObjectFactory::GenSmoothCube(
@@ -161,11 +230,12 @@ namespace fmega {
 		std::vector<ColorVertex>& vertices,
 		std::vector<uint32>& indices,
 		int v0, int v1, int v2,
-		bool isOutward, bool addNormal) {
+		bool isOutward, bool addNormal,
+		const glm::vec3& objCenter) {
 
 		glm::vec3 p[3] = { vertices[v0].position, vertices[v1].position, vertices[v2].position };
 		glm::vec3 normal = GetNormal(p[0], p[1], p[2]);
-		glm::vec3 oToFaceCenter = (p[0] + p[1] + p[2]) / 3.f;
+		glm::vec3 oToFaceCenter = (p[0] + p[1] + p[2]) / 3.f - objCenter;
 		float d = glm::dot(normal, oToFaceCenter);
 		if ((d > 0) ^ isOutward) {
 			normal = -normal;
@@ -632,7 +702,7 @@ namespace fmega {
 
 		for (int i = 1; i < ndiv - 1; i++) {
 			for (int j = 0; j < ndiv; j++) {
-				float a = float(j) / ndiv * glm::pi<float>() * 2.0f;
+				float a = float(j) / ndiv * glm::two_pi<float>();
 				float b = float(i) / ndiv * glm::pi<float>() - glm::half_pi<float>();
 				glm::vec3 d = glm::vec3(
 					cos(b) * sin(a),

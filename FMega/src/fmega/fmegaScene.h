@@ -42,7 +42,6 @@ namespace fmega {
 		FMegaRenderer* m_Renderer;
 		RestartManager* m_RestartManager;
 		PlatformManager* m_PlatformManager;
-		Skybox* m_Skybox = nullptr;
 		RewindManager* m_Rewind;
 		FMegaAssets* m_Assets;
 	};

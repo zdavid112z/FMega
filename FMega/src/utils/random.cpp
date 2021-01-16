@@ -75,4 +75,20 @@ namespace fmega {
 		return glm::vec4(NextFloat(), NextFloat(), NextFloat(), NextFloat());
 	}
 
+	glm::vec3 Random::NextVec3Normalized() {
+		glm::vec2 angles = NextVec2();
+		float a = angles.x * glm::two_pi<float>();
+		float b = angles.y * glm::pi<float>() - glm::half_pi<float>();
+		return glm::vec3(
+			cos(b) * sin(a),
+			sin(b),
+			cos(b) * cos(a));
+	}
+
+	glm::quat Random::NextQuat() {
+		glm::vec3 axis = NextVec3Normalized();
+		float angle = NextFloat() * glm::pi<float>();
+		return glm::angleAxis(angle, axis);
+	}
+
 }

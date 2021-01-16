@@ -99,7 +99,7 @@ namespace fmega {
 			else {
 				auto& textures = it->second.textures;
 				auto itt = std::find(textures.begin(), textures.end(), texture);
-				data.textureID = itt - textures.begin();
+				data.textureID = float(itt - textures.begin());
 				if (itt == it->second.textures.end()) {
 					textures.push_back(texture);
 				}
@@ -113,6 +113,9 @@ namespace fmega {
 		MeshType prevType = MeshType::INVALID;
 
 		for (auto it = m_Queue.begin(); it != m_Queue.end(); it++) {
+			if (it->first.ui && !m_DrawUI) {
+				continue;
+			}
 			BindShaderAndTextures(it->first, it->second);
 			RenderMesh(it, false);
 		}
@@ -147,9 +150,13 @@ namespace fmega {
 	void FMegaRenderer::RenderMesh(QueueType::iterator& it, bool bindShader)
 	{
 		MeshType type = it->first.type;
-		if (type == MeshType::MESH_2D)
-			glDisable(GL_DEPTH_TEST);
-		else glEnable(GL_DEPTH_TEST);
+		glEnable(GL_DEPTH_TEST);
+		if (type == MeshType::MESH_2D) {
+			glDepthMask(GL_FALSE);
+		}
+		else {
+			glDepthMask(GL_TRUE);
+		}
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		auto& key = it->first;
@@ -221,6 +228,10 @@ namespace fmega {
 		}
 	}
 
+	void FMegaRenderer::SetDrawUI(bool b) {
+		m_DrawUI = b;
+	}
+
 	void FMegaRenderer::SetShake(ShakeType type, float duration) {
 		if (int(type) <= int(m_ShakeType) && type != ShakeType::NONE) {
 			return;
@@ -242,7 +253,7 @@ namespace fmega {
 		m_ShakeType = type;
 	}
 
-	void FMegaRenderer::Prepare(float delta, float skyboxOffset)
+	void FMegaRenderer::Prepare(float delta)
 	{
 		SceneBuffer bufferData;
 		bufferData.targetZ = m_Scene->TargetZ;
@@ -274,12 +285,11 @@ namespace fmega {
 		view[3] = glm::vec4(0, 0, 0, 1);
 		bufferData.invViewProjection = glm::inverse(projection * view);
 		bufferData.eyePosition = m_Scene->GetCamera()->position;
-		bufferData.cameraOffset = skyboxOffset;
 		
 		std::vector<PointLight> pointLights;
 		std::vector<SpotLight> spotLights;
 		m_Scene->ForeachEntity([this, &pointLights, &spotLights](Entity* e) {
-			if (StringUtils::StartsWith(e->GetName(), "Light")) {
+			if (StringUtils::StartsWith(e->GetName(), "Light_")) {
 				Light* l = (Light*)e;
 				switch (l->GetLightType()) {
 				case LightType::POINT:
@@ -320,6 +330,11 @@ namespace fmega {
 		}
 
 		m_DynamicSceneBuffer->SetSubdata((byte*)&bufferData, sizeof(bufferData), 0);
+
+		UIBuffer uibuffer;
+		uibuffer.viewProjection = m_Scene->UICamera->viewProjection;
+		uibuffer.viewProjection3d = bufferData.viewProjection;
+		m_UIBuffer->SetSubdata((byte*)&uibuffer, sizeof(UIBuffer), 0);
 	}
 
 	void FMegaRenderer::RenderPlatform(Mesh* mesh, const glm::mat4& model, const glm::vec3& color, float destructZ) {

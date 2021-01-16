@@ -14,10 +14,7 @@ layout (location = 12) in vec4 aMetalness;
 layout(std140) uniform UIBuffer
 {
 	mat4 uViewProjection;
-	mat4 uInvViewProjection;
-	vec3 uEyePosition;
-	float uTargetZ;
-	float uCameraOffset;
+	mat4 uViewProjection3d;
 };
 
 out VertexData
@@ -25,15 +22,18 @@ out VertexData
 	vec4 vColor;
 	vec2 vUV;
 	float vTextureStrength;
+	float vOpacity;
 	flat int vTexture;
 } vData;
 
 void main()
 {
-    gl_Position = uViewProjection * aModel * vec4(aPosition.xyz, 1.0);
-	vec4 color = vec4(mix(aColor.rgb, aObjectColor.rgb, aObjectColor.a), aColor.a * aOpacity.r);
+	mat4 vp = uViewProjection3d * aOpacity.a + uViewProjection * (1.0 - aOpacity.a);
+    gl_Position = vp * aModel * vec4(aPosition.xyz, 1.0);
+	vec4 color = vec4(mix(aColor.rgb, aObjectColor.rgb, aObjectColor.a), aColor.a);
 	vData.vColor = color;
 	vData.vUV = aUV.xy;
+	vData.vOpacity = aOpacity.r;
 	vData.vTextureStrength = aOpacity.g;
 	vData.vTexture = int(aOpacity.b + 0.5);
 }

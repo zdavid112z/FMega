@@ -54,6 +54,15 @@ vec3 CalcLights(vec3 pos, vec3 N, vec3 albedo, float metalness, float roughness,
 
 vec2 GetUV(vec3 uv);
 
+float near = 0.1; 
+float far  = 100.0; 
+  
+float LinearizeDepth(float depth) 
+{
+    float z = depth * 2.0 - 1.0; // back to NDC 
+    return (2.0 * near * far) / (far + near - z * (far - near));	
+}
+
 void main()
 {
 	vec3 pos = vData.vPosition;
@@ -66,7 +75,7 @@ void main()
 	vec3 normal = normalize(vData.vTBN * normalmapValue);
 
 	vec4 texColor = pow(texture(uAlbedoMap, uv), vec4(2.2, 2.2, 2.2, 1.0));
-	vec4 albedo = vec4(mix(vData.vColor.rgb, texColor.rgb, vData.vTexOpacity), vData.vColor.a * texColor.a);
+	vec4 albedo = vec4(mix(vData.vColor, texColor, vData.vTexOpacity));
 	albedo = pow(albedo, vec4(2.2, 2.2, 2.2, 1.0));
 	vec3 F0 = vec3(0.04); 
     F0 = mix(F0, albedo.rgb, metalness);
@@ -74,7 +83,7 @@ void main()
 	float fogAmount = CalcFogAmount(vData.vPosition, FogLimits);
 	float alpha = (1.0 - fogAmount) * albedo.a;
 	if (alpha <= 0.01) {
-		discard;
+		//discard;
 	}
 
 	// vec3 light = CalcLights(pos, normal, albedo.rgb, metalness, roughness, F0);
@@ -132,9 +141,11 @@ void main()
 	vec3 ambient = vec3(0.1) * albedo.rgb;
 	vec3 color = ambient + light;
 	color = color / (color + vec3(1.0));
-    color = pow(color, vec3(1.0/2.2));  
+    color = pow(color, vec3(1.0/2.2));
 	
 	outFragColor = vec4(color, alpha);
+	//float depth = LinearizeDepth(gl_FragCoord.z) / far;
+	//outFragColor = vec4(vec3(fogAmount), 1.0);
 	//outFragColor = vec4(0.4,0.3,0.2,1.0);
 }
 

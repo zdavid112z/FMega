@@ -24,6 +24,7 @@ namespace fmega {
 		static std::string ToString(const glm::vec2& v) { return "(" + std::to_string(v.x) + ", " + std::to_string(v.y) + ")"; }
 		static std::string ToString(const glm::vec3& v) { return "(" + std::to_string(v.x) + ", " + std::to_string(v.y) + ", " + std::to_string(v.z) + ")"; }
 		static std::string ToString(const glm::vec4& v) { return "(" + std::to_string(v.x) + ", " + std::to_string(v.y) + ", " + std::to_string(v.z) + ", " + std::to_string(v.w) + ")"; }
+		static std::string ToString(const glm::quat& v) { return "(" + std::to_string(v.x) + ", " + std::to_string(v.y) + ", " + std::to_string(v.z) + ", " + std::to_string(v.w) + ")"; }
 		static std::string ToString(const glm::mat3& v) { return "[ " + ToString(v[0]) + ",\n  " + ToString(v[1]) + ",\n  " + ToString(v[2]) + " ]"; }
 		static std::string ToString(const glm::mat4& v) { return "[ " + ToString(v[0]) + ",\n  " + ToString(v[1]) + ",\n  " + ToString(v[2]) + ",\n  " + ToString(v[3]) + " ]"; }
 		static std::string ToString(char v) { return std::string(&v, 1); }

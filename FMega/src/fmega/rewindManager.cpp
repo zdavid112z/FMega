@@ -6,8 +6,7 @@
 
 namespace fmega {
 
-	RewindManager::RewindManager(FMegaScene* scene, int recordFPS, float recordDuration) :
-		m_TimePerFrame(1.f / 30.f) {
+	RewindManager::RewindManager(FMegaScene* scene, int recordFPS, float recordDuration) {
 		m_Scene = scene;
 		m_FPS = recordFPS;
 		m_RecDuration = recordDuration;
@@ -21,11 +20,6 @@ namespace fmega {
 		m_MaxTime = 0;
 		m_Rewinding = false;
 		m_RewindStartTime = 0;
-
-		m_CurrentFrame = 0;
-		m_Direction = 1;
-		m_NumFrames = 0;
-		m_CurrentFrameTime = 0;
 	}
 
 	RewindManager::~RewindManager() {
@@ -49,21 +43,29 @@ namespace fmega {
 		if (!m_Rewinding || m_NumFrames == 0) {
 			return;
 		}
-		m_CurrentFrameTime += delta;
-		while (m_CurrentFrameTime > m_TimePerFrame) {
-			m_CurrentFrameTime -= m_TimePerFrame;
-			m_CurrentFrame += m_Direction;
-			if (m_CurrentFrame < 0 || m_CurrentFrame >= m_NumFrames) {
-				m_Direction = -m_Direction;
-				m_CurrentFrame += m_Direction * 2;
-				m_CurrentFrame = glm::clamp(m_CurrentFrame, 0, m_NumFrames - 1);
-			}
+		float x = GetTargetAmount() * (m_NumFrames - 1);
+		float frame = glm::clamp(2 * glm::min(x, m_NumFrames - 1 - x), 0.f, m_NumFrames - 1.f);
+		int f0 = int(frame);
+		int f1 = f0 + 1;
+		float amount1 = glm::fract(frame);
+		float amount0 = 1.f - amount1;
+
+		{
+			MeshRenderData d;
+			d.model = glm::scale(glm::mat4(1), glm::vec3(16, 9, 1));
+			d.albedoStrength = 1;
+			d.opacity = amount0;
+			m_Scene->GetRenderer()->RenderMesh2D(m_Scene->GetAssets()->BoxMesh, d, true, true,
+				m_Scene->GetAssets()->RewindTextures[f0]);
 		}
-		MeshRenderData d;
-		d.model = glm::scale(glm::mat4(1), glm::vec3(16, 9, 1));
-		d.albedoStrength = 1;
-		m_Scene->GetRenderer()->RenderMesh2D(m_Scene->GetAssets()->BoxMesh, d, true, true,
-			m_Scene->GetAssets()->RewindTextures[m_CurrentFrame]);
+		{
+			MeshRenderData d;
+			d.model = glm::scale(glm::mat4(1), glm::vec3(16, 9, 1));
+			d.albedoStrength = 1;
+			d.opacity = amount1;
+			m_Scene->GetRenderer()->RenderMesh2D(m_Scene->GetAssets()->BoxMesh, d, true, true,
+				m_Scene->GetAssets()->RewindTextures[f1]);
+		}
 	}
 
 	void RewindManager::DeleteInvalidEntities() {
@@ -122,13 +124,16 @@ namespace fmega {
 	void RewindManager::StartRewind() {
 		m_Rewinding = true;
 		m_RewindStartTime = m_Scene->GetGame()->GetTime();
-		m_CurrentFrame = 0;
-		m_Direction = 1;
 		m_NumFrames = m_Scene->GetAssets()->NumRewindTexturesLoaded;
-		m_CurrentFrameTime = 0.f;
 	}
 
 	float RewindManager::GetTargetTime() {
+		float recDuration = m_MaxTime - m_MinTime;
+		float x = GetTargetAmount();
+		return m_RewindStartTime - x * recDuration - (m_RewindStartTime - m_MaxTime);
+	}
+
+	float RewindManager::GetTargetAmount() {
 		float t = m_Scene->GetGame()->GetTime();
 		float recDuration = m_MaxTime - m_MinTime;
 		float x = (t - m_RewindStartTime) / recDuration;
@@ -138,7 +143,7 @@ namespace fmega {
 			float k = 2.f + 3.f * x;
 			x = o - s * 0.5f * glm::pow(2 * (o - s * x), k);
 		}
-		return m_RewindStartTime - x * recDuration - (m_RewindStartTime - m_MaxTime);
+		return x;
 	}
 
 	bool RewindManager::Rewind() {

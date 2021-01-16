@@ -5,6 +5,16 @@
 namespace fmega {
 
 	void FMegaAssets::LoadAll() {
+
+		LampMesh = FMegaObjectFactory::GenLamp(4);
+		TunnelMesh = FMegaObjectFactory::GenTunnel(1);
+		BoxMesh = FMegaObjectFactory::GenBox(1024);
+		SegmentMesh = FMegaObjectFactory::GenSegment(64);
+		HeartMesh = FMegaObjectFactory::GenHeart(4);
+		SphereMesh = FMegaObjectFactory::GenSphere(1);
+		PickupMesh = FMegaObjectFactory::GenPickup(128);
+		BarsMesh = FMegaObjectFactory::GenBars(4);
+
 		/*PlatformAlbedo = new Texture2D("assets/textures/floor_tiles_06_diff_1k_metal.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
 		PlatformNormalmap = new Texture2D("assets/textures/floor_tiles_06_nor_1k2.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
 		PlatformRoughness = new Texture2D("assets/textures/floor_tiles_06_metal2.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
@@ -29,17 +39,18 @@ namespace fmega {
 		PlayerRoughness = new Texture2D("assets/textures/MetalPlates001_1K_Roughness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
 		PlayerMetalness = new Texture2D("assets/textures/MetalPlates001_1K_Metalness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
 
+		BarsAlbedo = new Texture2D("assets/textures/Pipe001_1K_Color.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		BarsNormalmap = new Texture2D("assets/textures/Pipe001_1K_Normal.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		BarsRoughness = new Texture2D("assets/textures/Pipe001_1K_Roughness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		BarsMetalness = new Texture2D("assets/textures/Pipe001_1K_Metalness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+
 		DiscoAlbedo    = new Texture2D("assets/textures/MetalPlates007_1K_Color2.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
 		DiscoNormalmap = new Texture2D("assets/textures/MetalPlates007_1K_Normal.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
 		DiscoRoughness = new Texture2D("assets/textures/MetalPlates007_1K_Roughness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
 		DiscoMetalness = new Texture2D("assets/textures/MetalPlates007_1K_Metalness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
 
-		LampMesh = FMegaObjectFactory::GenLamp(4);
-		TunnelMesh = FMegaObjectFactory::GenTunnel(1);
-		BoxMesh = FMegaObjectFactory::GenBox(1024);
-		SegmentMesh = FMegaObjectFactory::GenSegment(64);
-		SphereMesh = FMegaObjectFactory::GenSphere(1);
-		PickupMesh = FMegaObjectFactory::GenPickup(128);
+		BinocularsTexture = new Texture2D("assets/textures/binoculars.png", 4, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		QuestionmarkTexture = new Texture2D("assets/textures/questionmark.png", 4, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
 
 		m_RewindLoadThread = std::thread([this]() {
 			using namespace std::chrono_literals;
@@ -52,6 +63,10 @@ namespace fmega {
 	}
 
 	void FMegaAssets::DestroyAll() {
+
+		delete QuestionmarkTexture;
+		delete BinocularsTexture;
+
 		delete TunnelAlbedo;
 		delete TunnelRoughness;
 		delete TunnelNormalmap;
@@ -72,12 +87,19 @@ namespace fmega {
 		delete DiscoRoughness;
 		delete DiscoMetalness;
 
+		delete BarsAlbedo;
+		delete BarsNormalmap;
+		delete BarsRoughness;
+		delete BarsMetalness;
+
 		delete LampMesh;
 		delete TunnelMesh;
 		delete PickupMesh;
 		delete SphereMesh;
 		delete BoxMesh;
 		delete SegmentMesh;
+		delete HeartMesh;
+		delete BarsMesh;
 
 		if (m_RewindLoadRunning) {
 			m_RewindLoadRunning = false;

@@ -7,7 +7,7 @@
 
 namespace fmega {
 
-	const int NumRewindImages = 53;
+	const int NumRewindImages = 49;
 
 	class FMegaAssets {
 	public:
@@ -33,10 +33,18 @@ namespace fmega {
 		Texture2D* PlayerRoughness = nullptr;
 		Texture2D* PlayerMetalness = nullptr;
 
+		Texture2D* BarsAlbedo = nullptr;
+		Texture2D* BarsNormalmap = nullptr;
+		Texture2D* BarsRoughness = nullptr;
+		Texture2D* BarsMetalness = nullptr;
+
 		Texture2D* DiscoAlbedo = nullptr;
 		Texture2D* DiscoNormalmap = nullptr;
 		Texture2D* DiscoRoughness = nullptr;
 		Texture2D* DiscoMetalness = nullptr;
+
+		Texture2D* BinocularsTexture = nullptr;
+		Texture2D* QuestionmarkTexture = nullptr;
 
 		Image RewindImages[NumRewindImages];
 		Texture2D* RewindTextures[NumRewindImages];
@@ -48,6 +56,8 @@ namespace fmega {
 		Mesh* SegmentMesh = nullptr;
 		Mesh* SphereMesh = nullptr;
 		Mesh* PickupMesh = nullptr;
+		Mesh* HeartMesh = nullptr;
+		Mesh* BarsMesh = nullptr;
 	private:
 		std::atomic_int m_NumRewindImagesLoaded = 0;
 		std::atomic_bool m_RewindLoadRunning = true;

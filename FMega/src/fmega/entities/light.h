@@ -15,8 +15,11 @@ namespace fmega {
 	class Light : public FMegaEntity {
 	public:
 		Light(const std::string& name, Entity* parent, FMegaScene* scene, const glm::vec3& color, float intensity, const glm::vec3& atten);
-		Light(const std::string& name, Entity* parent, FMegaScene* scene, const glm::vec3& color, float intensity, const glm::vec3& atten, const glm::vec3& direction, const glm::vec2& cutoffAnglesDeg);
+		Light(const std::string& name, Entity* parent, FMegaScene* scene, const glm::vec3& color, float intensity, const glm::vec3& atten, const glm::vec3& direction, const glm::vec2& cutoffCos);
 		virtual ~Light();
+
+		void Init(const glm::vec3& color, float intensity, const glm::vec3& atten);
+		void Init(const glm::vec3& color, float intensity, const glm::vec3& atten, const glm::vec3& direction, const glm::vec2& cutoffCos);
 
 		virtual void Update(float delta) override;
 		virtual void Render(float delta) override;

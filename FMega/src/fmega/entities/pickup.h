@@ -19,6 +19,8 @@ namespace fmega {
 		virtual void Update(float delta) override;
 		virtual void Render(float delta) override;
 
+		bool IsTaken();
+		void OnPlayerTake();
 		virtual byte* GetData(uint& size) override;
 		glm::vec3 TypeToColor();
 
@@ -31,8 +33,9 @@ namespace fmega {
 			struct {
 				glm::vec3 m_Color;
 				glm::vec3 m_Target;
+				bool m_Taken;
 			};
-			byte m_Data[20];
+			byte m_Data[32];
 		};
 	};
 

@@ -9,6 +9,7 @@
 #include "tunnel.h"
 #include "pickup.h"
 #include "wall.h"
+#include "discoLight.h"
 
 namespace fmega {
 
@@ -16,7 +17,7 @@ namespace fmega {
 
 	Player::Player(const std::string& name, Entity* parent, FMegaScene* scene, float radius) :
 		FMegaEntity(name, parent, scene),
-		m_Radius(radius),
+		Radius(radius),
 		m_MaxFuel(10.f),
 		m_Speeds({ 10.f, 15.f, 20.f, 25.f, 30.f }),
 		m_FuelBonusB(2.5f),
@@ -38,8 +39,7 @@ namespace fmega {
 		m_MaxSpeedColor(glm::vec4(1, 0, 0, 1)),
 		m_JumpVelocity(sqrt(2 * m_RiseGravity * m_JumpMaxHeight)),
 		m_OnLandHeightImpulse(4.f),
-		m_NumLives(3),
-		m_DiscoTime(10.f),
+		m_DiscoTime(5.f),
 		m_FarsightTime(15.f),
 		m_MaxRewinds(3),
 		m_DiscoTimer(0.f),
@@ -48,7 +48,12 @@ namespace fmega {
 		m_NearsightTargetZ(-15.f),
 		m_FarsightTargetZ(-40.f),
 		m_SightSpeed(0.25f),
-		m_RenderTargetZ(-15.f)
+		m_RenderTargetZ(-15.f),
+		m_Score(0),
+		m_ScoreWallbreak(2500),
+		m_ScorePickup(250),
+		m_ScoreDiscoBonus(750),
+		m_DiscoAngle(0.f)
 	{
 		m_CameraIndex = 0;
 		m_Fuel = m_MaxFuel;
@@ -80,7 +85,7 @@ namespace fmega {
 
 		m_AnimSpeed = 3.f;
 
-		CircleObject* col = new CircleObject(this, glm::mat4(1), m_Radius);
+		CircleObject* col = new CircleObject(this, glm::mat4(1), Radius);
 		Init(col);
 
 		constexpr float fov = glm::radians(90.f);
@@ -92,6 +97,15 @@ namespace fmega {
 		m_FMegaScene->SetCamera(m_Cameras[m_CameraIndex]->GetCamera());
 
 		UpdateSceneSpeed();
+
+		for (int i = 0; i < 8; i++) {
+
+			glm::quat initial = Random::NextQuat();
+			glm::quat vel = glm::angleAxis(Random::NextFloat(glm::radians(glm::vec2(45.f, 60.f))), Random::NextVec3Normalized());
+
+			DiscoLight* l = new DiscoLight(StringUtils::ToString(i), scene, this, float(i), initial, vel);
+			scene->AddEntity(l);
+		}
 	}
 
 	Player::~Player()
@@ -140,12 +154,13 @@ namespace fmega {
 		CalcHeight(delta);
 
 		m_LocalTransform.rotation.x -= delta * m_RotationSpeed * m_FMegaScene->MoveSpeed / m_Speeds.back();
-		m_LocalTransform.position.y = m_BottomY + m_Radius * m_Height;
+		m_LocalTransform.position.y = m_BottomY + Radius * m_Height;
 
 		m_Cameras[m_CameraIndex]->Update(delta);
 	}
 
 	void Player::UpdateEffects(float delta) {
+		m_DiscoTimer = glm::max(m_DiscoTimer - delta, 0.f);
 		m_FarsightTimer = glm::max(m_FarsightTimer - delta, 0.f);
 		if (m_FarsightTimer > 0) {
 			m_CurrentTargetZ = m_FarsightTargetZ;
@@ -313,7 +328,7 @@ namespace fmega {
 		glm::vec3 oCenterToClosest = closest - oCenter;
 		float oCenterToClosestLength = glm::length(oCenterToClosest);
 
-		if (oCenterToClosestLength > m_Radius) {
+		if (oCenterToClosestLength > Radius) {
 			return;
 		}
 
@@ -321,7 +336,7 @@ namespace fmega {
 			return;
 		}
 
-		float normalLength = m_Radius - oCenterToClosestLength;
+		float normalLength = Radius - oCenterToClosestLength;
 		glm::vec3 oCenterToClosestN = glm::normalize(oCenterToClosest);
 //		LOG_INFO(oCenter, pSizes, pCenter, diff, clamped, closest, oCenterToClosest, oCenterToClosestLength, normalLength, oCenterToClosestN, );
 		m_LocalTransform.position -= oCenterToClosestN * normalLength * glm::min(1.f, delta * m_LostCollisionMultiplier);
@@ -352,12 +367,13 @@ namespace fmega {
 	}
 
 	void Player::HandlePickup(Pickup* p) {
-		if (!Collision::TestCollision(GetCollision(), p->GetCollision())) {
+		if (!Collision::TestCollision(GetCollision(), p->GetCollision()) || p->IsTaken()) {
 			return;
 		}
 		switch (p->Type)
 		{
 		case PickupType::DISCO:
+			m_Score += m_ScoreDiscoBonus;
 			m_DiscoTimer = m_DiscoTime;
 			break;
 		case PickupType::REWIND:
@@ -369,13 +385,15 @@ namespace fmega {
 		default:
 			break;
 		}
-		p->Destroy();
+		p->OnPlayerTake();
+		m_Score += m_ScorePickup;
 	}
 
 	bool Player::CheckCollidesWith(Wall* w) {
 		if (w->Broken || !Collision::TestCollision(GetCollision(), w->GetCollision())) {
 			return false;
 		}
+		m_Score += m_ScoreWallbreak;
 		w->OnHitByPlayer();
 		return true;
 	}
@@ -467,5 +485,54 @@ namespace fmega {
 
 		if (m_CameraIndex != 0) // FP Camera
 			m_FMegaScene->GetRenderer()->RenderPlayer(m_GlobalTransform, m_Height, m_AnimTime, false);
+
+		DrawUI();
 	}
+
+	void Player::DrawUI()
+	{
+		{
+			int scoreToDisplay = glm::min(m_Score, 9999999);
+			for (int i = 0; i < 7; i++) {
+				int digit = scoreToDisplay % 10;
+				scoreToDisplay /= 10;
+				MeshRenderData data;
+				data.model = glm::translate(glm::mat4(1), glm::vec3(15.f - i * 1.5f, 7.5f, -50));
+				data.color = glm::vec4(0);
+				m_FMegaScene->GetRenderer()->RenderDigit(m_FMegaScene->GetAssets()->SegmentMesh, data, digit);
+			}
+		}
+
+		for (int i = 0; i < m_MaxRewinds; i++) {
+			MeshRenderData data;
+			data.model = glm::translate(glm::mat4(1), glm::vec3(14.5f - i * 2.5f, 5.5f, -50)) * glm::scale(glm::mat4(1), glm::vec3(1, 1, 1));
+			if (i < m_NumRewinds) {
+				data.color = glm::vec4(0.9f, 0.2f, 0.3f, 1.0);
+			}
+			else {
+				data.color = glm::vec4(0, 0, 0, 1);
+			}
+			if (!m_FMegaScene->GetRewind()->CanRewind() || m_FMegaScene->GetRewind()->IsRewinding()) {
+				data.color *= glm::vec4(glm::vec3(0.5f), 1.0f);
+			}
+			m_FMegaScene->GetRenderer()->RenderMesh(m_FMegaScene->GetAssets()->HeartMesh, data, true);
+		}
+
+		if (m_FarsightTimer > 0) {
+			float op = glm::clamp(m_FarsightTimer * 0.33f, 0.f, 1.f);
+			float scale = 1.5f / 2.f;
+			MeshRenderData data;
+			data.model = glm::translate(glm::mat4(1), glm::vec3(14.5f - m_MaxRewinds * 2.5f, 5.5f - 0.25f, -50)) * glm::scale(glm::mat4(1), glm::vec3(scale, scale, 1));
+			data.color = glm::vec4(0);
+			data.albedoStrength = 1;
+			data.opacity = op;
+			m_FMegaScene->GetRenderer()->RenderMesh2D(m_FMegaScene->GetAssets()->BoxMesh, data, true, true, m_FMegaScene->GetAssets()->BinocularsTexture);
+		}
+	}
+
+	float Player::GetDiscoLightIntensity() {
+		float x = glm::clamp(m_DiscoTimer * 0.5f, 0.f, 1.f);
+		return x;
+	}
+
 }
