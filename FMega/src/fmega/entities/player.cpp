@@ -484,7 +484,7 @@ namespace fmega {
 		}
 
 		if (m_CameraIndex != 0) // FP Camera
-			m_FMegaScene->GetRenderer()->RenderPlayer(m_GlobalTransform, m_Height, m_AnimTime, false);
+			m_FMegaScene->GetRenderer()->RenderPlayer(m_GlobalTransform, m_Height, m_AnimTime);
 
 		DrawUI();
 	}

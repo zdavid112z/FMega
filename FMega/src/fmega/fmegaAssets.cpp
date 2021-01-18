@@ -39,15 +39,10 @@ namespace fmega {
 		PlayerRoughness = new Texture2D("assets/textures/MetalPlates001_1K_Roughness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
 		PlayerMetalness = new Texture2D("assets/textures/MetalPlates001_1K_Metalness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
 
-		BarsAlbedo = new Texture2D("assets/textures/Pipe001_1K_Color.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
-		BarsNormalmap = new Texture2D("assets/textures/Pipe001_1K_Normal.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
-		BarsRoughness = new Texture2D("assets/textures/Pipe001_1K_Roughness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
-		BarsMetalness = new Texture2D("assets/textures/Pipe001_1K_Metalness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
-
-		DiscoAlbedo    = new Texture2D("assets/textures/MetalPlates007_1K_Color2.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
-		DiscoNormalmap = new Texture2D("assets/textures/MetalPlates007_1K_Normal.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
-		DiscoRoughness = new Texture2D("assets/textures/MetalPlates007_1K_Roughness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
-		DiscoMetalness = new Texture2D("assets/textures/MetalPlates007_1K_Metalness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		BarsAlbedo    = new Texture2D("assets/textures/Metal022_1K_Color.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		BarsNormalmap = new Texture2D("assets/textures/Metal022_1K_Normal.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		BarsRoughness = new Texture2D("assets/textures/Metal022_1K_Roughness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
+		BarsMetalness = new Texture2D("assets/textures/Metal022_1K_Metalness.png", 3, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
 
 		BinocularsTexture = new Texture2D("assets/textures/binoculars.png", 4, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
 		QuestionmarkTexture = new Texture2D("assets/textures/questionmark.png", 4, TextureFilter::LINEAR, TextureWrap::REPEAT, true);
@@ -81,11 +76,6 @@ namespace fmega {
 		delete PlayerNormalmap;
 		delete PlayerRoughness;
 		delete PlayerMetalness;
-
-		delete DiscoAlbedo;
-		delete DiscoNormalmap;
-		delete DiscoRoughness;
-		delete DiscoMetalness;
 
 		delete BarsAlbedo;
 		delete BarsNormalmap;

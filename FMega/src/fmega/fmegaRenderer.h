@@ -138,7 +138,7 @@ namespace fmega {
 		void RenderDigit(Mesh* segment, MeshRenderData data, int digit);
 		void RenderAll();
 		void RenderPlatform(Mesh* mesh, const glm::mat4& model, const glm::vec3& color, float destructZ);
-		void RenderPlayer(const glm::mat4& model, float height, float animTime, bool useDiscoTextures);
+		void RenderPlayer(const glm::mat4& model, float height, float animTime);
 		void RenderSkybox();
 		void SetShake(ShakeType type, float duration = 0.f);
 		void SetDrawUI(bool);

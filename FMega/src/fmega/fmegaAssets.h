@@ -38,11 +38,6 @@ namespace fmega {
 		Texture2D* BarsRoughness = nullptr;
 		Texture2D* BarsMetalness = nullptr;
 
-		Texture2D* DiscoAlbedo = nullptr;
-		Texture2D* DiscoNormalmap = nullptr;
-		Texture2D* DiscoRoughness = nullptr;
-		Texture2D* DiscoMetalness = nullptr;
-
 		Texture2D* BinocularsTexture = nullptr;
 		Texture2D* QuestionmarkTexture = nullptr;
 

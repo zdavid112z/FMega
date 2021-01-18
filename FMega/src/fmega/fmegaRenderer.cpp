@@ -368,7 +368,7 @@ namespace fmega {
 		glDepthMask(GL_TRUE);
 	}
 
-	void FMegaRenderer::RenderPlayer(const glm::mat4& model, float height, float animTime, bool useDiscoTextures) {
+	void FMegaRenderer::RenderPlayer(const glm::mat4& model, float height, float animTime) {
 		m_PlayerShader->Bind();
 		DynamicPlayerBuffer buffer;
 		buffer.model = model;
@@ -377,18 +377,10 @@ namespace fmega {
 		m_PlayerShader->SetDynamicObjectBuffer("DynamicObjectBuffer", (byte*)&buffer);
 		m_PlayerShader->SetBuffer("DynamicSceneBuffer", m_DynamicSceneBuffer);
 		m_PlayerShader->SetBuffer("StaticBuffer", m_StaticPlayerBuffer);
-		if (useDiscoTextures) {
-			m_PlayerShader->SetTexture("uAlbedoMap", m_Scene->GetAssets()->DiscoAlbedo);
-			m_PlayerShader->SetTexture("uNormalMap", m_Scene->GetAssets()->DiscoNormalmap);
-			m_PlayerShader->SetTexture("uRoughnessMap", m_Scene->GetAssets()->DiscoRoughness);
-			m_PlayerShader->SetTexture("uMetalnessMap", m_Scene->GetAssets()->DiscoMetalness);
-		}
-		else {
-			m_PlayerShader->SetTexture("uAlbedoMap", m_Scene->GetAssets()->PlayerAlbedo);
-			m_PlayerShader->SetTexture("uNormalMap", m_Scene->GetAssets()->PlayerNormalmap);
-			m_PlayerShader->SetTexture("uRoughnessMap", m_Scene->GetAssets()->PlayerRoughness);
-			m_PlayerShader->SetTexture("uMetalnessMap", m_Scene->GetAssets()->PlayerMetalness);
-		}
+		m_PlayerShader->SetTexture("uAlbedoMap", m_Scene->GetAssets()->PlayerAlbedo);
+		m_PlayerShader->SetTexture("uNormalMap", m_Scene->GetAssets()->PlayerNormalmap);
+		m_PlayerShader->SetTexture("uRoughnessMap", m_Scene->GetAssets()->PlayerRoughness);
+		m_PlayerShader->SetTexture("uMetalnessMap", m_Scene->GetAssets()->PlayerMetalness);
 		m_Scene->GetAssets()->SphereMesh->DrawNow();
 	}
 
